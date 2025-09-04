@@ -1,0 +1,223 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MINISTER
+  ATTENDEE
+}
+
+enum ServiceStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+}
+
+enum PrayerRequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id                String             @id @default(cuid())
+  name              String?
+  email             String             @unique
+  emailVerified     DateTime?
+  image            String?
+  password         String
+  phone            String?
+  bio              String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  roles            UserRole[]
+  prayerRequests   PrayerRequest[]   @relation("PrayerRequests")
+  assignedPrayers  PrayerRequest[]   @relation("AssignedPrayers")
+  servicesAttended ServiceAttendance[]
+  messages         Message[]
+  devotions        Devotion[]
+  sentInvites      Invite[]          @relation("SentInvites")
+  receivedInvites  Invite[]          @relation("ReceivedInvites")
+  donations        Donation[]
+  notices          Notice[]
+  bibleHighlights  BibleHighlight[]
+  devotionInteractions DevotionInteraction[]
+}
+
+model Service {
+  id              String             @id @default(cuid())
+  title           String
+  description     String?
+  startTime       DateTime
+  endTime         DateTime?
+  status          ServiceStatus      @default(SCHEDULED)
+  youtubeUrl      String?
+  chatEnabled     Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  messages        Message[]
+  attendance      ServiceAttendance[]
+  serviceMoments  ServiceMoment[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PrayerRequest {
+  id          String           @id @default(cuid())
+  title       String
+  content     String
+  isPublic    Boolean          @default(false)
+  status      PrayerRequestStatus @default(PENDING)
+  userId      String
+  user        User             @relation("PrayerRequests", fields: [userId], references: [id])
+  assignedToId String?
+  assignedTo  User?            @relation("AssignedPrayers", fields: [assignedToId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ServiceAttendance {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  joinedAt  DateTime @default(now())
+  leftAt    DateTime?
+
+  @@unique([userId, serviceId])
+}
+
+model Devotion {
+  id          String                @id @default(cuid())
+  title       String
+  content     String
+  published   Boolean               @default(false)
+  authorId    String
+  author      User                  @relation(fields: [authorId], references: [id])
+  interactions DevotionInteraction[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+}
+
+model DevotionInteraction {
+  id         String   @id @default(cuid())
+  devotionId String
+  devotion   Devotion @relation(fields: [devotionId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  isSaved    Boolean  @default(false)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([devotionId, userId])
+}
+
+model Invite {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  sentById     String
+  sentBy       User     @relation("SentInvites", fields: [sentById], references: [id])
+  sentToEmail  String
+  sentToId     String?
+  sentTo       User?    @relation("ReceivedInvites", fields: [sentToId], references: [id])
+  accepted     Boolean  @default(false)
+  acceptedAt   DateTime?
+  createdAt    DateTime @default(now())
+}
+
+model Donation {
+  id           String   @id @default(cuid())
+  amount       Float
+  currency     String   @default("USD")
+  paymentMethod String
+  paymentId    String
+  status       String
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  campaignId   String?
+  campaign     DonationCampaign? @relation(fields: [campaignId], references: [id])
+  receiptSent  Boolean  @default(false)
+  receiptId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model DonationCampaign {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  goalAmount  Float
+  currentAmount Float    @default(0)
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean    @default(true)
+  donations   Donation[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BibleHighlight {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  book        String
+  chapter     Int
+  verse       Int
+  content     String
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ServiceMoment {
+  id          String   @id @default(cuid())
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id])
+  timestamp   Int      // In seconds from service start
+  title       String
+  description String?
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
