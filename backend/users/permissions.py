@@ -1,4 +1,6 @@
 from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Role
 
 class IsAdminUser(permissions.BasePermission):
@@ -100,13 +102,13 @@ class HasPermission(permissions.BasePermission):
         # Check if the user has the required permission in any of their roles
         return request.user.roles.filter(
             permissions__has_key=self.permission_codename,
-            permissions__permission_codename=True
+            permissions__contains={self.permission_codename: True},
         ).exists()
 
 def has_permission_decorator(permission_codename):
-    ""
+    """
     Decorator to check if the user has a specific permission.
-    ""
+    """
     def decorator(view_func):
         def wrapped_view(self, request, *args, **kwargs):
             if not request.user or not request.user.is_authenticated:
@@ -120,7 +122,7 @@ def has_permission_decorator(permission_codename):
                 
             has_perm = request.user.roles.filter(
                 permissions__has_key=permission_codename,
-                permissions__permission_codename=True
+                permissions__contains={permission_codename: True},
             ).exists()
             
             if has_perm:

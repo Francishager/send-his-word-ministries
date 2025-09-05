@@ -1,0 +1,22 @@
+# Environment files
+.env
+.env.*
+# If you keep sample envs, uncomment next line to allow committing sample files
+# !.env.example
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Django static files build
+staticfiles/
+
+# Node artifacts (if any frontend lives here)
+node_modules/
+.next/
+.dist/
+
+# OS files
+.DS_Store
+Thumbs.db

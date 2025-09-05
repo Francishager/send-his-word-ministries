@@ -25,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { success, error: toastError } = useToast();
   const { signIn, isAuthenticated, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { callbackUrl } = router.query;
@@ -57,21 +57,14 @@ export default function LoginPage() {
         rememberMe: data.rememberMe,
       });
 
-      toast({
-        title: 'Login successful',
-        description: 'You have been successfully logged in.',
-      });
+      success('Login successful');
 
       const redirectUrl = Array.isArray(callbackUrl) ? callbackUrl[0] : callbackUrl || '/dashboard';
       router.push(redirectUrl);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred during login';
       
-      toast({
-        title: 'Login failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toastError(`Login failed: ${errorMessage}`);
 
       // Set form error for specific field if available
       if (error instanceof Error && 'field' in error) {

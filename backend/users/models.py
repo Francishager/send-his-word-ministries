@@ -56,6 +56,7 @@ class Role(models.Model):
 
     class Meta:
         ordering = ['name']
+        db_table = 'roles'
 
 class User(AbstractBaseUser, PermissionsMixin):
     """
@@ -63,13 +64,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
     email = models.EmailField(unique=True, db_index=True)
     first_name = models.CharField(max_length=150, blank=True)
+    middle_name = models.CharField(max_length=150, blank=True)  
     last_name = models.CharField(max_length=150, blank=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     
     # Role and permissions
-    roles = models.ManyToManyField(Role, related_name='users', blank=True)
+    roles = models.ManyToManyField('Role', through='UserRole', related_name='users', blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
@@ -108,6 +110,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
         ordering = ['-date_joined']
+        db_table = 'users'
+
+class UserRole(models.Model):
+    """Explicit through model mapping to SQL table 'user_roles'."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    assigned_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_roles'
+        unique_together = ('user', 'role')
 
 class UserProfile(models.Model):
     """
@@ -139,3 +154,4 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = 'User Profile'
         verbose_name_plural = 'User Profiles'
+        ordering = ['-created_at']

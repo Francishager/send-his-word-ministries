@@ -1,47 +1,97 @@
 # Send His Word Ministries
 
-A modern, role-based web application for Send His Word Ministries, featuring live streaming, prayer requests, devotionals, and community engagement tools.
+A modern web application for Send His Word Ministries built with Next.js, TypeScript, and Tailwind CSS.
 
-## Features
+## 🚀 Getting Started
 
-- **Role-based access control** (Public, Attendee, Minister, Admin)
-- **Live streaming** with chat and prayer requests
-- **Devotionals & Bible study tools**
-- **Prayer request system** with private 1:1 prayer rooms
-- **Donation processing** with multiple payment methods
-- **Community engagement** features
+### Prerequisites
 
-## Tech Stack
+- Node.js 18.18.0 or higher
+- npm 9.x or higher
+- Git
 
-- **Frontend**: Next.js 13+ with TypeScript, Tailwind CSS
-- **Backend**: Node.js with Next.js API routes
-- **Database**: PostgreSQL with Prisma ORM
-- **Realtime**: Socket.IO
-- **Authentication**: NextAuth.js
-- **Payments**: Stripe, Mobile Money integration
+### Installation
 
-## Getting Started
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/send-his-word-ministries.git
+   cd send-his-word-ministries
+   ```
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables (copy `.env.example` to `.env.local`)
-4. Run the development server: `npm run dev`
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Development
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Update the environment variables in `.env.local` with your configuration.
 
-- Run development server: `npm run dev`
-- Build for production: `npm run build`
-- Start production server: `npm start`
-- Run tests: `npm test`
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Project Structure
+## 🛠 Scripts
 
-- `/app` - Next.js 13+ app directory
-- `/components` - Reusable UI components
-- `/lib` - Utility functions and configurations
-- `/prisma` - Database schema and migrations
-- `/public` - Static assets
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Generate test coverage report
+- `db:generate` - Generate Prisma client
+- `db:migrate` - Run database migrations
+- `db:studio` - Open Prisma Studio
 
-## License
+## 🏗 Project Structure
 
-MIT
+```
+.
+├── .github/           # GitHub configurations
+├── .husky/            # Git hooks
+├── .next/             # Next.js build output
+├── node_modules/      # Dependencies
+├── prisma/            # Database schema and migrations
+├── public/            # Static files
+└── src/               # Source files
+    ├── app/           # App Router
+    ├── components/    # Reusable components
+    ├── lib/           # Utility functions
+    ├── pages/         # Pages router
+    ├── styles/        # Global styles
+    └── types/         # TypeScript type definitions
+```
+
+## 🔧 Tech Stack
+
+- **Framework**: [Next.js 14](https://nextjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Data Fetching**: [React Query](https://tanstack.com/query/latest)
+- **Form Handling**: [React Hook Form](https://react-hook-form.com/)
+- **Validation**: [Zod](https://zod.dev/)
+- **Database**: [Prisma](https://www.prisma.io/)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/)
+- **UI Components**: [Headless UI](https://headlessui.com/)
+- **Icons**: [Heroicons](https://heroicons.com/)
+- **Linting**: [ESLint](https://eslint.org/)
+- **Formatting**: [Prettier](https://prettier.io/)
+- **Git Hooks**: [Husky](https://typicode.github.io/husky/)
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Prisma Documentation](https://www.prisma.io/docs/)
+- [React Query Documentation](https://tanstack.com/query/latest)
