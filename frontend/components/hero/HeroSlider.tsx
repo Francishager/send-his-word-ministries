@@ -15,15 +15,20 @@ interface HeroSliderProps {
   autoAdvanceMs?: number;
 }
 
-export const HeroSlider: React.FC<HeroSliderProps> = ({ slides, heightClass = 'h-[420px]', autoAdvanceMs = 6000 }) => {
+export const HeroSlider: React.FC<HeroSliderProps> = ({ slides, heightClass = 'h-[420px]', autoAdvanceMs = 2000 }) => {
   const [index, setIndex] = React.useState(0);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [fade, setFade] = React.useState(true);
 
   React.useEffect(() => {
     if (slides.length <= 1) return;
     timeoutRef.current && clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setIndex((prev) => (prev + 1) % slides.length);
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % slides.length);
+        setFade(true);
+      }, 150);
     }, autoAdvanceMs);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -38,9 +43,10 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ slides, heightClass = 'h
     <div className={`relative w-full ${heightClass} overflow-hidden bg-gray-900`}>
       {/* Image */}
       <img
+        key={index}
         src={current.src}
         alt={current.alt || current.title || 'Hero'}
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
+        className={`absolute inset-0 w-full h-full object-cover opacity-80 transition-opacity duration-700 ${fade ? 'opacity-80' : 'opacity-0'}`}
         loading="eager"
       />
       {/* Gradient overlay */}

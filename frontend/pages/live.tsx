@@ -9,11 +9,25 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const slides: HeroSlide[] = [
   {
-    src: '/images/hero/live-1.jpg',
+    src: '/images/hero/live-1.svg',
     title: 'Live Service',
     subtitle: 'We go live soon. Join the community and invite a friend!',
     ctaText: 'Invite Someone',
     ctaHref: '/auth/login',
+  },
+  {
+    src: '/images/hero/home-1.svg',
+    title: 'Worship Together',
+    subtitle: 'Experience powerful moments of worship from anywhere in the world.',
+    ctaText: 'Join Live',
+    ctaHref: '/live',
+  },
+  {
+    src: '/images/hero/home-2.svg',
+    title: 'Community & Prayer',
+    subtitle: 'Share testimonies, request prayer, and connect with our community.',
+    ctaText: 'Request Prayer',
+    ctaHref: '/live',
   },
 ];
 
@@ -43,7 +57,7 @@ export default function LivePage() {
 
   return (
     <MainLayout title="Live Service">
-      <HeroSlider slides={slides} heightClass="h-[360px]" />
+      <HeroSlider slides={slides} heightClass="h-[360px]" autoAdvanceMs={2000} />
 
       <section className="max-w-6xl mx-auto px-4 py-8">
         {error && (

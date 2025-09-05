@@ -4,14 +4,14 @@ import Link from 'next/link';
 
 const slides: HeroSlide[] = [
   {
-    src: '/images/hero/home-1.jpg',
+    src: '/images/hero/home-1.svg',
     title: 'Send His Word Ministries',
     subtitle: 'A real-time hub for worship, prayer, and community engagement',
     ctaText: 'Join Live Service',
     ctaHref: '/live',
   },
   {
-    src: '/images/hero/home-2.jpg',
+    src: '/images/hero/home-2.svg',
     title: 'You are Welcome Here',
     subtitle: 'Connect in chat, request prayer, and grow in fellowship',
     ctaText: 'Sign In',
@@ -22,7 +22,7 @@ const slides: HeroSlide[] = [
 export default function HomePage() {
   return (
     <MainLayout>
-      <HeroSlider slides={slides} />
+      <HeroSlider slides={slides} autoAdvanceMs={2000} />
 
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-6">

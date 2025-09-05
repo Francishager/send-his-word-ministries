@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import Head from 'next/head';
+import SiteHeader from './SiteHeader';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -21,6 +22,9 @@ export default function MainLayout({
         <meta name="description" content={description} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      {/* Global navbar */}
+      <SiteHeader />
 
       <main className={`flex-grow ${className}`}>
         {children}
