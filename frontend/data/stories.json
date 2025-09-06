@@ -1,0 +1,32 @@
+[
+  {
+    "src": "/images/hero/home_hero_1.JPG",
+    "name": "Aisha",
+    "quote": "I encountered God in worship and found a praying family.",
+    "focus": "50% 25%"
+  },
+  {
+    "src": "/images/hero/home_hero_2.JPG",
+    "name": "Daniel",
+    "quote": "Prayer team reached me when I needed it most.",
+    "focus": "50% 30%"
+  },
+  {
+    "src": "/images/hero/home_hero_3.JPG",
+    "name": "Grace",
+    "quote": "The Word each week keeps me anchored and encouraged.",
+    "focus": "50% 20%"
+  },
+  {
+    "src": "/images/hero/home_hero_4.JPG",
+    "name": "Michael",
+    "quote": "Even from afar, I feel connected and cared for.",
+    "focus": "50% 28%"
+  },
+  {
+    "src": "/images/hero/home_hero_5.JPG",
+    "name": "Joy",
+    "quote": "My testimony sparked hope in others—God is faithful.",
+    "focus": "50% 22%"
+  }
+]

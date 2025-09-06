@@ -11,43 +11,74 @@ export interface HeroSlide {
 
 interface HeroSliderProps {
   slides: HeroSlide[];
-  heightClass?: string; // e.g., "h-[420px]"
+  heightClass?: string; // override default responsive heights
   autoAdvanceMs?: number;
 }
 
-export const HeroSlider: React.FC<HeroSliderProps> = ({ slides, heightClass = 'h-[420px]', autoAdvanceMs = 2000 }) => {
+export const HeroSlider: React.FC<HeroSliderProps> = ({
+  slides,
+  // Fill most of the viewport on desktop while keeping mobile compact
+  heightClass = 'h-[360px] md:h-[70vh] lg:h-screen',
+  autoAdvanceMs = 3500,
+}) => {
   const [index, setIndex] = React.useState(0);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [fade, setFade] = React.useState(true);
+  const [animating, setAnimating] = React.useState(false);
+  const nextImgRef = React.useRef<HTMLImageElement | null>(null);
 
   React.useEffect(() => {
     if (slides.length <= 1) return;
     timeoutRef.current && clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setFade(false);
-      setTimeout(() => {
+      setAnimating(true);
+      // Allow the transition to play (must match duration below ~1000ms)
+      const transMs = 1000;
+      const id = setTimeout(() => {
         setIndex((prev) => (prev + 1) % slides.length);
-        setFade(true);
-      }, 150);
+        setAnimating(false);
+      }, transMs);
+      return () => clearTimeout(id);
     }, autoAdvanceMs);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [index, slides.length, autoAdvanceMs]);
 
+  // Preload next image to avoid flicker
+  React.useEffect(() => {
+    if (!slides.length) return;
+    const nextIndex = (index + 1) % slides.length;
+    const img = new Image();
+    img.src = slides[nextIndex].src;
+    nextImgRef.current = img as any;
+  }, [index, slides]);
+
   if (!slides.length) return null;
 
   const current = slides[index];
+  const nextIndex = (index + 1) % slides.length;
+  const next = slides[nextIndex];
 
   return (
     <div className={`relative w-full ${heightClass} overflow-hidden bg-gray-900`}>
-      {/* Image */}
+      {/* Stacked images for seamless crossfade + slide */}
+      {/* Current image */}
       <img
-        key={index}
         src={current.src}
         alt={current.alt || current.title || 'Hero'}
-        className={`absolute inset-0 w-full h-full object-cover opacity-80 transition-opacity duration-700 ${fade ? 'opacity-80' : 'opacity-0'}`}
+        className={`absolute inset-0 w-full h-full object-cover object-center md:object-[50%_30%] opacity-80 transition-all duration-[1000ms] ease-in-out
+          ${animating ? '-translate-x-2 opacity-0 scale-[1.02]' : 'translate-x-0 opacity-80 scale-[1.04]'}
+        `}
         loading="eager"
+      />
+      {/* Next image */}
+      <img
+        src={next.src}
+        alt={next.alt || next.title || 'Hero next'}
+        className={`absolute inset-0 w-full h-full object-cover object-center md:object-[50%_30%] opacity-0 transition-all duration-[1000ms] ease-in-out
+          ${animating ? 'translate-x-0 opacity-80 scale-[1.04]' : 'translate-x-2 opacity-0 scale-[1.02]'}
+        `}
+        aria-hidden
       />
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
@@ -65,20 +96,6 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ slides, heightClass = 'h
           </a>
         )}
       </div>
-
-      {/* Dots */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIndex(i)}
-              className={`h-2.5 w-2.5 rounded-full border border-white/60 ${i === index ? 'bg-white' : 'bg-white/30'}`}
-              aria-label={`Slide ${i + 1}`}
-            />)
-          )}
-        </div>
-      )}
     </div>
   );
 };

@@ -67,7 +67,7 @@ async function responseInterceptor<T>(
 }
 
 // Error handler
-function handleError(error: any, options: RequestOptions) {
+function handleApiError(error: any, options: RequestOptions) {
   const errorMessage =
     options.errorMessage || error.message || 'An unexpected error occurred';
 
@@ -131,7 +131,7 @@ export async function apiRequest<T = any>(
 ): Promise<T> {
   const {
     auth = true,
-    handleError = true,
+    handleError: shouldHandleError = true,
     retry = 2,
     retryDelay = 1000,
     params,
@@ -158,8 +158,8 @@ export async function apiRequest<T = any>(
       const response = await fetch(url.toString(), requestOptions);
       return await responseInterceptor<T>(response, options);
     } catch (error: any) {
-      if (handleError) {
-        handleError(error, options);
+      if (shouldHandleError) {
+        handleApiError(error, options);
       }
       throw error;
     }
@@ -222,25 +222,5 @@ export async function del<T = any>(
   return apiRequest<T>(endpoint, { ...options, method: 'DELETE' });
 }
 
-// Add a response interceptor for common error handling
-const originalFetch = global.fetch;
-
-global.fetch = async function (input, init) {
-  try {
-    // Add request interceptor logic here if needed
-    const response = await originalFetch(input, init);
-    
-    // Add response interceptor logic here
-    if (!response.ok) {
-      const error = new Error(response.statusText);
-      (error as any).status = response.status;
-      throw error;
-    }
-    
-    return response;
-  } catch (error) {
-    // Handle fetch errors
-    console.error('Fetch error:', error);
-    throw error;
-  }
-};
+// Note: Avoid overriding global fetch in the browser/Next.js runtime.
+// Use apiRequest/get/post helpers above so we can control behavior per-call.

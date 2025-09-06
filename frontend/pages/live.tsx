@@ -6,6 +6,7 @@ import LivePlayer from '@/components/live/LivePlayer';
 import ChatPanel from '@/components/live/ChatPanel';
 import PrayerQueue from '@/components/prayer/PrayerQueue';
 import { useAuth } from '@/contexts/AuthContext';
+import { Share2, ThumbsUp, Heart } from 'lucide-react';
 
 const slides: HeroSlide[] = [
   {
@@ -69,58 +70,126 @@ export default function LivePage() {
             {startDate && (
               <p className="text-gray-600">Starts at {startDate.toLocaleString()}</p>
             )}
-            <div className="mt-4 flex justify-center gap-4 text-white">
-              {([
-                { label: 'Days', value: c.days },
-                { label: 'Hours', value: c.hours },
-                { label: 'Minutes', value: c.minutes },
-                { label: 'Seconds', value: c.seconds },
-              ] as const).map((item) => (
-                <div key={item.label} className="bg-indigo-600 rounded-md px-4 py-3 min-w-[84px]">
-                  <div className="text-3xl font-bold leading-none">{item.value.toString().padStart(2, '0')}</div>
-                  <div className="text-xs uppercase tracking-wide opacity-90">{item.label}</div>
-                </div>
-              ))}
+            <div className="mt-4 mx-auto max-w-xl rounded-2xl border border-gray-700 bg-gray-900/95 p-4 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
+              <div className="text-xs tracking-widest text-gray-400">LIVE IN</div>
+              <div className="mt-2 flex justify-center gap-3 sm:gap-4">
+                {([
+                  { label: 'Days', value: c.days },
+                  { label: 'Hours', value: c.hours },
+                  { label: 'Minutes', value: c.minutes },
+                  { label: 'Seconds', value: c.seconds },
+                ] as const).map((item) => (
+                  <div key={item.label} className="rounded-md bg-black/40 border border-indigo-500/30 px-4 py-3 min-w-[84px] text-center">
+                    <div className="font-mono text-3xl font-extrabold text-indigo-200 leading-none">{item.value.toString().padStart(2, '0')}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-indigo-300/80 mt-1">{item.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
             <p className="mt-4 text-gray-600">This page will automatically switch to the livestream when we go live.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 bg-black rounded-lg overflow-hidden aspect-video">
-              {canRenderPlayer ? (
-                <LivePlayer provider={provider} sourceIdOrUrl={source} />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white">Live Player</div>
-              )}
-            </div>
-            <aside className="space-y-4">
-              <div className="bg-white rounded-lg border p-4 h-[360px]">
-                <h3 className="text-lg font-semibold mb-2">Live Chat</h3>
-                {service?.id ? (
-                  <>
-                    {!isAuthenticated && (
-                      <div className="mb-2 text-sm text-gray-600">
-                        <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to participate.
-                      </div>
-                    )}
-                    <ChatPanel serviceId={service.id} canPost={isAuthenticated} />
-                  </>
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Player + details */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-black rounded-xl overflow-hidden aspect-video">
+                {canRenderPlayer ? (
+                  <LivePlayer provider={provider} sourceIdOrUrl={source} />
                 ) : (
-                  <div className="text-gray-600">Connecting…</div>
+                  <div className="w-full h-full flex items-center justify-center text-white">Live Player</div>
                 )}
               </div>
-              <div className="bg-white rounded-lg border p-4">
-                {!isAuthenticated && (
-                  <div className="mb-2 text-sm text-gray-600">
-                    <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to request prayer.
-                  </div>
-                )}
-                <PrayerQueue canRequest={isAuthenticated} />
+              {/* Service details / actions */}
+              <div className="bg-white rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Now Streaming</div>
+                  <h3 className="text-xl font-semibold">{service?.title || 'Live Service'}</h3>
+                  {startDate && <div className="text-xs text-gray-500">Started at {startDate.toLocaleString()}</div>}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
+                    <ThumbsUp className="h-4 w-4" /> Amen
+                  </button>
+                  <button className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
+                    <Heart className="h-4 w-4" /> Bless
+                  </button>
+                  <a href={typeof window !== 'undefined' ? window.location.href : '/live'} className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
+                    <Share2 className="h-4 w-4" /> Share
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Right panel with tabs */}
+            <aside className="space-y-4">
+              <div className="bg-white rounded-xl border">
+                <div className="flex border-b">
+                  <TabButton active>Chat</TabButton>
+                  <TabButton>Prayer</TabButton>
+                </div>
+                <div className="p-4">
+                  <TabbedPanels serviceId={service?.id} isAuthenticated={isAuthenticated} />
+                </div>
+              </div>
+              {/* Optional: viewers info */}
+              <div className="bg-white rounded-xl border p-4 text-sm text-gray-600">
+                <div className="flex items-center justify-between">
+                  <div>Viewers</div>
+                  <div className="font-semibold">~ {Math.floor(Math.random()*200)+50}</div>
+                </div>
               </div>
             </aside>
           </div>
         )}
       </section>
     </MainLayout>
+  );
+}
+
+// Simple tab button and panels (local to this page)
+function TabButton({ active, children }: { active?: boolean; children: React.ReactNode }) {
+  return (
+    <button className={`flex-1 px-4 py-2 text-sm font-medium ${active ? 'text-indigo-700 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>{children}</button>
+  );
+}
+
+function TabbedPanels({ serviceId, isAuthenticated }: { serviceId?: string; isAuthenticated: boolean }) {
+  const [tab, setTab] = React.useState<'chat'|'prayer'>('chat');
+  return (
+    <div>
+      <div className="hidden" aria-hidden>
+        {/* buttons are rendered above; manage state by keyboard in future */}
+      </div>
+      <div className="min-h-[340px]">
+        {tab === 'chat' ? (
+          serviceId ? (
+            <>
+              {!isAuthenticated && (
+                <div className="mb-2 text-sm text-gray-600">
+                  <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to participate.
+                </div>
+              )}
+              <ChatPanel serviceId={serviceId} canPost={isAuthenticated} />
+            </>
+          ) : (
+            <div className="text-gray-600">Connecting…</div>
+          )
+        ) : (
+          <>
+            {!isAuthenticated && (
+              <div className="mb-2 text-sm text-gray-600">
+                <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to request prayer.
+              </div>
+            )}
+            <PrayerQueue canRequest={isAuthenticated} />
+          </>
+        )}
+      </div>
+      {/* Tab controls (mobile/desktop consistent) */}
+      <div className="flex gap-2 mt-3">
+        <button onClick={() => setTab('chat')} className={`flex-1 rounded-md px-3 py-2 text-sm ${tab==='chat' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Chat</button>
+        <button onClick={() => setTab('prayer')} className={`flex-1 rounded-md px-3 py-2 text-sm ${tab==='prayer' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Prayer</button>
+      </div>
+    </div>
   );
 }

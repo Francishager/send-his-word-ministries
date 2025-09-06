@@ -17,8 +17,8 @@ export default function SiteHeader() {
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 font-extrabold text-lg text-indigo-700">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded bg-indigo-600 text-white">SHW</span>
-            <span className="hidden sm:block">Send His Word</span>
+            <img src="/images/logo/shwm_logo.png" alt="Send His Word Ministries" className="h-8 w-auto" />
+            <span className="hidden sm:block text-gray-900">Send His Word</span>
           </Link>
         </div>
 

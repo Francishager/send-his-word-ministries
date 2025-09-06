@@ -1,6 +1,6 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
@@ -22,14 +22,14 @@ const contactSchema = z.object({
 type ContactForm = z.infer<typeof contactSchema>;
 
 export default function ContactPage() {
-  const { toast, error: toastError, success } = useToast();
+  const { toast, error, success } = useToast();
   const [loading, setLoading] = React.useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
     defaultValues: { consent: false },
   });
 
-  const onSubmit = async (data: ContactForm) => {
+  const onSubmit: SubmitHandler<ContactForm> = async (data) => {
     setLoading(true);
     try {
       const res = await fetch('/api/contact', {
@@ -37,14 +37,14 @@ export default function ContactPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j?.ok) {
         throw new Error(j?.error || 'Failed to send message');
       }
       success('Message sent! We will get back to you soon.');
       reset();
     } catch (e: any) {
-      toast('Could not send message. Please try again later.');
+      error(e?.message || 'Could not send message. Please try again later.');
     } finally {
       setLoading(false);
     }
