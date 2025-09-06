@@ -24,6 +24,9 @@ export interface AuthUser extends UserProfile {
   expiresIn: number;
 }
 
+// Alias to satisfy modules that import { User } from '@/types/user'
+export type User = AuthUser;
+
 export interface LoginCredentials {
   email: string;
   password: string;
