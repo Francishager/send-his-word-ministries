@@ -1,6 +1,12 @@
 import { ReactNode } from 'react';
 import MainLayout from '../MainLayout';
-import { HomeIcon, CalendarIcon, InformationCircleIcon, UserGroupIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import {
+  HomeIcon,
+  CalendarIcon,
+  InformationCircleIcon,
+  UserGroupIcon,
+  BookOpenIcon,
+} from '@heroicons/react/24/outline';
 
 interface PublicPortalProps {
   children: ReactNode;
@@ -45,14 +51,14 @@ export default function PublicPortal({ children, title }: PublicPortalProps) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {children}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">{children}</div>
 
       {/* Upcoming Events Section */}
       <div className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">Upcoming Events</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">
+            Upcoming Events
+          </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {[1, 2, 3].map((event) => (
               <div key={event} className="bg-white overflow-hidden shadow rounded-lg">

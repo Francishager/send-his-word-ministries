@@ -10,11 +10,17 @@
 }
 
 /* Utility for smoother transforms */
-.will-change-transform { will-change: transform; }
-.will-change-opacity { will-change: opacity; }
+.will-change-transform {
+  will-change: transform;
+}
+.will-change-opacity {
+  will-change: opacity;
+}
 
 /* Global resets / theme tweaks */
-html, body, #__next {
+html,
+body,
+#__next {
   height: 100%;
 }
 

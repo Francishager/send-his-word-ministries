@@ -54,10 +54,16 @@ function useServiceMoment() {
     let mounted = true;
     fetch('/api/moment')
       .then((r) => r.json())
-      .then((j) => { if (mounted) setMoment(j?.moment || null); })
+      .then((j) => {
+        if (mounted) setMoment(j?.moment || null);
+      })
       .catch(() => {})
-      .finally(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
   }, []);
   return { moment, loading };
 }
@@ -130,18 +136,30 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-6">
           <FadeUp className="p-6 rounded-lg border bg-gray-50">
             <h3 className="text-xl font-semibold mb-2">Worship Together</h3>
-            <p className="text-gray-600 mb-4">Join our livestream with countdown, auto-switch, and replay with synced chat.</p>
-            <Link className="text-indigo-600 font-medium" href="/live">Go to Live</Link>
+            <p className="text-gray-600 mb-4">
+              Join our livestream with countdown, auto-switch, and replay with synced chat.
+            </p>
+            <Link className="text-indigo-600 font-medium" href="/live">
+              Go to Live
+            </Link>
           </FadeUp>
           <FadeUp className="p-6 rounded-lg border bg-gray-50" delayMs={80}>
             <h3 className="text-xl font-semibold mb-2">Request Prayer</h3>
-            <p className="text-gray-600 mb-4">Our ministers would love to stand with you in prayer and faith.</p>
-            <Link className="text-indigo-600 font-medium" href="/live#prayer">Ask for Prayer</Link>
+            <p className="text-gray-600 mb-4">
+              Our ministers would love to stand with you in prayer and faith.
+            </p>
+            <Link className="text-indigo-600 font-medium" href="/live#prayer">
+              Ask for Prayer
+            </Link>
           </FadeUp>
           <FadeUp className="p-6 rounded-lg border bg-gray-50" delayMs={140}>
             <h3 className="text-xl font-semibold mb-2">Give</h3>
-            <p className="text-gray-600 mb-4">Partner with the mission and help us reach more people.</p>
-            <Link className="text-indigo-600 font-medium" href="/give">Partner with Us</Link>
+            <p className="text-gray-600 mb-4">
+              Partner with the mission and help us reach more people.
+            </p>
+            <Link className="text-indigo-600 font-medium" href="/give">
+              Partner with Us
+            </Link>
           </FadeUp>
         </div>
       </section>
@@ -178,7 +196,9 @@ export default function HomePage() {
               ) : (
                 <Clock className="h-6 w-6 text-indigo-600" />
               )}
-              <h3 className="text-xl font-semibold">{isLive ? 'We are LIVE now' : 'Service Moment'}</h3>
+              <h3 className="text-xl font-semibold">
+                {isLive ? 'We are LIVE now' : 'Service Moment'}
+              </h3>
             </div>
             <div className="text-gray-700">
               {!isLive && (
@@ -197,38 +217,72 @@ export default function HomePage() {
                               allowFullScreen
                             />
                           ) : (
-                            <button onClick={() => setMomentPlaying(true)} className="absolute inset-0 w-full h-full group">
-                              <img src={moment?.image || '/images/hero/home_hero_2.JPG'} alt={moment?.title || 'Service Moment'} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition" />
+                            <button
+                              onClick={() => setMomentPlaying(true)}
+                              className="absolute inset-0 w-full h-full group"
+                            >
+                              <img
+                                src={moment?.image || '/images/hero/home_hero_2.JPG'}
+                                alt={moment?.title || 'Service Moment'}
+                                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition"
+                              />
                               <span className="absolute inset-0 flex items-center justify-center">
                                 <span className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow">
-                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 text-indigo-600"><path d="M8 5v14l11-7z"/></svg>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="h-7 w-7 text-indigo-600"
+                                  >
+                                    <path d="M8 5v14l11-7z" />
+                                  </svg>
                                 </span>
                               </span>
                             </button>
                           )}
                         </div>
                       ) : (
-                        <img src={moment?.image || '/images/hero/home_hero_2.JPG'} alt={moment?.title || 'Service Moment'} className="w-full h-full object-cover" />
+                        <img
+                          src={moment?.image || '/images/hero/home_hero_2.JPG'}
+                          alt={moment?.title || 'Service Moment'}
+                          className="w-full h-full object-cover"
+                        />
                       )}
                     </div>
                     <div className="sm:col-span-2 p-4">
-                      <h4 className="text-lg font-semibold mb-1">{moment?.title || 'Upcoming Highlight'}</h4>
-                      <p className="text-sm text-gray-700 mb-3">{moment?.message || 'Stay tuned for our next powerful gathering. Invite someone who needs hope today.'}</p>
+                      <h4 className="text-lg font-semibold mb-1">
+                        {moment?.title || 'Upcoming Highlight'}
+                      </h4>
+                      <p className="text-sm text-gray-700 mb-3">
+                        {moment?.message ||
+                          'Stay tuned for our next powerful gathering. Invite someone who needs hope today.'}
+                      </p>
                       {moment?.ctaText && moment?.ctaHref && (
-                        <a href={moment.ctaHref} className="inline-flex items-center gap-2 rounded-md bg-indigo-600 text-white px-4 py-2">{moment.ctaText}</a>
+                        <a
+                          href={moment.ctaHref}
+                          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 text-white px-4 py-2"
+                        >
+                          {moment.ctaText}
+                        </a>
                       )}
                     </div>
                   </div>
                 </div>
               )}
               {isLive && (
-                <Link href="/live" className="inline-flex items-center gap-2 rounded-md bg-indigo-600 text-white px-4 py-2">
+                <Link
+                  href="/live"
+                  className="inline-flex items-center gap-2 rounded-md bg-indigo-600 text-white px-4 py-2"
+                >
                   Join Live <ArrowRight className="h-4 w-4" />
                 </Link>
               )}
             </div>
           </FadeUp>
-          <FadeUp className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-white border" delayMs={100}>
+          <FadeUp
+            className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-white border"
+            delayMs={100}
+          >
             <h3 className="text-xl font-semibold mb-2">What to expect</h3>
             <ul className="space-y-2 text-gray-700 list-disc list-inside">
               <li>Uplifting worship and teaching</li>
@@ -243,30 +297,54 @@ export default function HomePage() {
       {/* Ministries / Features grid */}
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Our Ministries</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">
+            Our Ministries
+          </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><Church className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Worship Services</h3></div>
-              <p className="text-gray-600">Join our weekly services and special events from anywhere.</p>
+              <div className="flex items-center gap-3 mb-2">
+                <Church className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Worship Services</h3>
+              </div>
+              <p className="text-gray-600">
+                Join our weekly services and special events from anywhere.
+              </p>
             </div>
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><Users className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Small Groups</h3></div>
+              <div className="flex items-center gap-3 mb-2">
+                <Users className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Small Groups</h3>
+              </div>
               <p className="text-gray-600">Grow in fellowship through circles and Bible studies.</p>
             </div>
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><HeartHandshake className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Prayer & Care</h3></div>
-              <p className="text-gray-600">Receive prayer and pastoral care from trained ministers.</p>
+              <div className="flex items-center gap-3 mb-2">
+                <HeartHandshake className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Prayer & Care</h3>
+              </div>
+              <p className="text-gray-600">
+                Receive prayer and pastoral care from trained ministers.
+              </p>
             </div>
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><Book className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Devotions</h3></div>
+              <div className="flex items-center gap-3 mb-2">
+                <Book className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Devotions</h3>
+              </div>
               <p className="text-gray-600">Daily devotions and notes to encourage your journey.</p>
             </div>
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><PlayCircle className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Replays</h3></div>
+              <div className="flex items-center gap-3 mb-2">
+                <PlayCircle className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Replays</h3>
+              </div>
               <p className="text-gray-600">Catch up on services with synced chat and highlights.</p>
             </div>
             <div className="p-6 rounded-lg border bg-gray-50">
-              <div className="flex items-center gap-3 mb-2"><ArrowRight className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Next Steps</h3></div>
+              <div className="flex items-center gap-3 mb-2">
+                <ArrowRight className="h-5 w-5 text-indigo-600" />
+                <h3 className="font-semibold">Next Steps</h3>
+              </div>
               <p className="text-gray-600">Get connected, serve, and partner with the mission.</p>
             </div>
           </div>
@@ -277,11 +355,16 @@ export default function HomePage() {
       <section className="py-12 bg-indigo-50">
         <div className="max-w-6xl mx-auto px-4">
           <FadeUp>
-            <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Stories of Impact</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">
+              Stories of Impact
+            </h2>
           </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {stories.map((t: any, i: number) => (
-              <FadeUp key={i} className="rounded-xl overflow-hidden bg-white border shadow-sm flex flex-col">
+              <FadeUp
+                key={i}
+                className="rounded-xl overflow-hidden bg-white border shadow-sm flex flex-col"
+              >
                 <img
                   src={t.src}
                   alt={t.name}
@@ -302,12 +385,20 @@ export default function HomePage() {
       <section className="py-12 bg-gradient-to-b from-[var(--brand-100,#eef2ff)] to-[var(--brand-200,#dbe3ff)]">
         <div className="max-w-6xl mx-auto px-4">
           <FadeUp>
-            <h2 className="text-2xl font-bold mb-3 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Past Highlights</h2>
-            <p className="text-gray-700 mb-6 text-center">Moments from recent gatherings and outreach.</p>
+            <h2 className="text-2xl font-bold mb-3 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">
+              Past Highlights
+            </h2>
+            <p className="text-gray-700 mb-6 text-center">
+              Moments from recent gatherings and outreach.
+            </p>
           </FadeUp>
           <div className="rounded-xl overflow-hidden border">
             <HeroSlider
-              slides={(highlights || []).map((h) => ({ src: h.src, title: h.title, subtitle: h.subtitle }))}
+              slides={(highlights || []).map((h) => ({
+                src: h.src,
+                title: h.title,
+                subtitle: h.subtitle,
+              }))}
               autoAdvanceMs={2000}
               heightClass="h-[260px] md:h-[360px]"
             />

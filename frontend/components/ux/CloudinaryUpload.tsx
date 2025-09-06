@@ -9,7 +9,14 @@ interface CloudinaryUploadProps {
   maxSizeBytes?: number; // optional override
 }
 
-export default function CloudinaryUpload({ folder = 'shwm', onUploaded, className = '', buttonText = 'Upload Image', accept = 'image/*', maxSizeBytes }: CloudinaryUploadProps) {
+export default function CloudinaryUpload({
+  folder = 'shwm',
+  onUploaded,
+  className = '',
+  buttonText = 'Upload Image',
+  accept = 'image/*',
+  maxSizeBytes,
+}: CloudinaryUploadProps) {
   const [busy, setBusy] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -42,7 +49,11 @@ export default function CloudinaryUpload({ folder = 'shwm', onUploaded, classNam
     setBusy(true);
     try {
       // Get signature
-      const sigRes = await fetch('/api/upload/cloudinary-sign', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ folder }) });
+      const sigRes = await fetch('/api/upload/cloudinary-sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folder }),
+      });
       const sig = await sigRes.json();
       if (!sigRes.ok || !sig?.ok) throw new Error(sig?.error || 'Failed to sign');
       const fd = new FormData();
@@ -69,7 +80,12 @@ export default function CloudinaryUpload({ folder = 'shwm', onUploaded, classNam
   return (
     <div className={className}>
       <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={onFile} />
-      <button type="button" onClick={pick} disabled={busy} className="rounded-md border px-3 py-2 text-sm bg-white hover:bg-gray-50">
+      <button
+        type="button"
+        onClick={pick}
+        disabled={busy}
+        className="rounded-md border px-3 py-2 text-sm bg-white hover:bg-gray-50"
+      >
         {busy ? 'Uploading…' : buttonText}
       </button>
     </div>

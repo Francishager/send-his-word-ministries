@@ -26,7 +26,7 @@ describe('RegisterPage', () => {
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
-    
+
     // Setup default mock implementations
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
@@ -54,7 +54,7 @@ describe('RegisterPage', () => {
 
   it('renders registration form', () => {
     render(<RegisterPage />);
-    
+
     expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('RegisterPage', () => {
 
   it('validates form inputs', async () => {
     render(<RegisterPage />);
-    
+
     const submitButton = screen.getByRole('button', { name: /create account/i });
     fireEvent.click(submitButton);
 
@@ -80,10 +80,10 @@ describe('RegisterPage', () => {
 
   it('validates email format', async () => {
     render(<RegisterPage />);
-    
+
     const emailInput = screen.getByLabelText(/email/i);
     fireEvent.input(emailInput, { target: { value: 'invalid-email' } });
-    
+
     const submitButton = screen.getByRole('button', { name: /create account/i });
     fireEvent.click(submitButton);
 
@@ -92,13 +92,13 @@ describe('RegisterPage', () => {
 
   it('validates password match', async () => {
     render(<RegisterPage />);
-    
+
     const passwordInput = screen.getByLabelText(/password/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    
+
     fireEvent.input(passwordInput, { target: { value: 'password123' } });
     fireEvent.input(confirmPasswordInput, { target: { value: 'different' } });
-    
+
     const submitButton = screen.getByRole('button', { name: /create account/i });
     fireEvent.click(submitButton);
 
@@ -107,30 +107,30 @@ describe('RegisterPage', () => {
 
   it('handles successful registration', async () => {
     mockSignUp.mockResolvedValueOnce({});
-    
+
     render(<RegisterPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText(/first name/i), {
       target: { value: 'John' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/last name/i), {
       target: { value: 'Doe' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/email/i), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/password/i), {
       target: { value: 'password123' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/confirm password/i), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -147,7 +147,8 @@ describe('RegisterPage', () => {
     // Check if success toast was shown
     expect(mockToastFn).toHaveBeenCalledWith({
       title: 'Account created',
-      description: 'Your account has been created successfully. Please check your email to verify your account.',
+      description:
+        'Your account has been created successfully. Please check your email to verify your account.',
     });
 
     // Check if redirect happened
@@ -157,30 +158,30 @@ describe('RegisterPage', () => {
   it('handles registration error', async () => {
     const errorMessage = 'Email already in use';
     mockSignUp.mockRejectedValueOnce(new Error(errorMessage));
-    
+
     render(<RegisterPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText(/first name/i), {
       target: { value: 'John' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/last name/i), {
       target: { value: 'Doe' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/email/i), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/password/i), {
       target: { value: 'password123' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/confirm password/i), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -196,10 +197,10 @@ describe('RegisterPage', () => {
 
   it('redirects to login page if user clicks sign in link', () => {
     render(<RegisterPage />);
-    
+
     const signInLink = screen.getByRole('link', { name: /sign in/i });
     fireEvent.click(signInLink);
-    
+
     expect(mockPush).toHaveBeenCalledWith('/auth/login');
   });
 
@@ -215,9 +216,9 @@ describe('RegisterPage', () => {
       refreshSession: jest.fn(),
       hasRole: jest.fn(),
     });
-    
+
     render(<RegisterPage />);
-    
+
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
@@ -230,37 +231,37 @@ describe('RegisterPage', () => {
           resolveSignUp = resolve;
         })
     );
-    
+
     render(<RegisterPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText(/first name/i), {
       target: { value: 'John' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/last name/i), {
       target: { value: 'Doe' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/email/i), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/password/i), {
       target: { value: 'password123' },
     });
-    
+
     fireEvent.input(screen.getByLabelText(/confirm password/i), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    
+
     // Check if button is in loading state
     const button = screen.getByRole('button', { name: /create account/i });
     expect(button).toBeDisabled();
-    
+
     // Resolve the promise
     await waitFor(() => {
       resolveSignUp!({});

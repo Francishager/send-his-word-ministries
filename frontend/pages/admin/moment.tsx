@@ -39,7 +39,9 @@ function AdminMoment() {
     }
   };
 
-  React.useEffect(() => { load(); }, []);
+  React.useEffect(() => {
+    load();
+  }, []);
 
   const onChange = (patch: Partial<MomentData>) => setForm((prev) => ({ ...prev, ...patch }));
 
@@ -66,7 +68,9 @@ function AdminMoment() {
       <section className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Service Moment Billboard</h1>
-          <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </Button>
         </div>
 
         {loading ? (
@@ -75,50 +79,92 @@ function AdminMoment() {
           <div className="space-y-4 bg-white rounded-xl border p-4">
             <div>
               <Label className="block mb-1">Title</Label>
-              <Input value={form.title} onChange={(e) => onChange({ title: e.target.value })} placeholder="This Sunday: Healing & Hope" />
+              <Input
+                value={form.title}
+                onChange={(e) => onChange({ title: e.target.value })}
+                placeholder="This Sunday: Healing & Hope"
+              />
             </div>
             <div>
               <Label className="block mb-1">Message</Label>
-              <Input value={form.message} onChange={(e) => onChange({ message: e.target.value })} placeholder="Invite someone who needs encouragement today." />
+              <Input
+                value={form.message}
+                onChange={(e) => onChange({ message: e.target.value })}
+                placeholder="Invite someone who needs encouragement today."
+              />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <Label className="block mb-1">CTA Text</Label>
-                <Input value={form.ctaText || ''} onChange={(e) => onChange({ ctaText: e.target.value })} placeholder="Invite Someone" />
+                <Input
+                  value={form.ctaText || ''}
+                  onChange={(e) => onChange({ ctaText: e.target.value })}
+                  placeholder="Invite Someone"
+                />
               </div>
               <div>
                 <Label className="block mb-1">CTA Href</Label>
-                <Input value={form.ctaHref || ''} onChange={(e) => onChange({ ctaHref: e.target.value })} placeholder="/auth/login" />
+                <Input
+                  value={form.ctaHref || ''}
+                  onChange={(e) => onChange({ ctaHref: e.target.value })}
+                  placeholder="/auth/login"
+                />
               </div>
             </div>
             <div>
               <Label className="block mb-1">Video Url (YouTube / Shorts)</Label>
-              <Input value={form.videoUrl || ''} onChange={(e) => onChange({ videoUrl: e.target.value })} placeholder="https://www.youtube.com/shorts/XXXXX" />
+              <Input
+                value={form.videoUrl || ''}
+                onChange={(e) => onChange({ videoUrl: e.target.value })}
+                placeholder="https://www.youtube.com/shorts/XXXXX"
+              />
               <div className="mt-2 flex items-center gap-4 text-sm text-gray-700">
                 <label className="inline-flex items-center gap-2">
-                  <input type="checkbox" checked={!!form.autoplay} onChange={(e) => onChange({ autoplay: e.target.checked })} />
+                  <input
+                    type="checkbox"
+                    checked={!!form.autoplay}
+                    onChange={(e) => onChange({ autoplay: e.target.checked })}
+                  />
                   Autoplay
                 </label>
                 <label className="inline-flex items-center gap-2">
-                  <input type="checkbox" checked={form.muted !== false} onChange={(e) => onChange({ muted: e.target.checked })} />
+                  <input
+                    type="checkbox"
+                    checked={form.muted !== false}
+                    onChange={(e) => onChange({ muted: e.target.checked })}
+                  />
                   Muted
                 </label>
                 <label className="inline-flex items-center gap-2">
-                  <input type="checkbox" checked={!!form.loop} onChange={(e) => onChange({ loop: e.target.checked })} />
+                  <input
+                    type="checkbox"
+                    checked={!!form.loop}
+                    onChange={(e) => onChange({ loop: e.target.checked })}
+                  />
                   Loop
                 </label>
               </div>
             </div>
             <div>
               <Label className="block mb-1">Image Path</Label>
-              <Input value={form.image || ''} onChange={(e) => onChange({ image: e.target.value })} placeholder="/images/hero/home_hero_3.JPG" />
+              <Input
+                value={form.image || ''}
+                onChange={(e) => onChange({ image: e.target.value })}
+                placeholder="/images/hero/home_hero_3.JPG"
+              />
               {form.image && (
                 <div className="mt-3">
-                  <img src={form.image} alt="Moment Preview" className="w-full h-40 object-cover rounded-md border" />
+                  <img
+                    src={form.image}
+                    alt="Moment Preview"
+                    className="w-full h-40 object-cover rounded-md border"
+                  />
                 </div>
               )}
             </div>
-            <div className="text-xs text-gray-500">Tip: Place images under <code>/public/images/</code> for best performance.</div>
+            <div className="text-xs text-gray-500">
+              Tip: Place images under <code>/public/images/</code> for best performance.
+            </div>
           </div>
         )}
       </section>

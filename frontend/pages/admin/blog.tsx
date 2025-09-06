@@ -30,7 +30,7 @@ function AdminBlogPage() {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [editing, setEditing] = React.useState<Post | null>(null);
-  const [categories, setCategories] = React.useState<{id:string;name:string}[]>([]);
+  const [categories, setCategories] = React.useState<{ id: string; name: string }[]>([]);
   const dragIndex = React.useRef<number | null>(null);
 
   const load = async () => {
@@ -49,7 +49,9 @@ function AdminBlogPage() {
     }
   };
 
-  React.useEffect(() => { load(); }, []);
+  React.useEffect(() => {
+    load();
+  }, []);
 
   const startNew = () => {
     const now = new Date().toISOString();
@@ -92,8 +94,16 @@ function AdminBlogPage() {
     }
   };
 
-  const onField = (field: keyof Post, value: any) => setEditing((prev) => prev ? { ...prev, [field]: value } : prev);
-  const onTagChange = (value: string) => onField('tags', value.split(',').map((t) => t.trim()).filter(Boolean));
+  const onField = (field: keyof Post, value: any) =>
+    setEditing((prev) => (prev ? { ...prev, [field]: value } : prev));
+  const onTagChange = (value: string) =>
+    onField(
+      'tags',
+      value
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    );
 
   // DnD for list ordering
   const onDragStart = (index: number) => (e: React.DragEvent) => {
@@ -120,7 +130,11 @@ function AdminBlogPage() {
   const saveOrder = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/blog', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(posts) });
+      const res = await fetch('/api/blog', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(posts),
+      });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to save order');
     } catch (e) {
@@ -139,8 +153,12 @@ function AdminBlogPage() {
             {!editing && <Button onClick={startNew}>New Post</Button>}
             {editing && (
               <>
-                <Button variant="secondary" onClick={cancel}>Cancel</Button>
-                <Button onClick={upsert} disabled={saving}>{saving ? 'Saving…' : 'Save Post'}</Button>
+                <Button variant="secondary" onClick={cancel}>
+                  Cancel
+                </Button>
+                <Button onClick={upsert} disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Post'}
+                </Button>
               </>
             )}
           </div>
@@ -154,8 +172,12 @@ function AdminBlogPage() {
             ) : (
               <div className="overflow-x-auto border rounded-lg">
                 <div className="flex items-center justify-between px-3 py-2">
-                  <div className="text-sm text-gray-600">Drag rows to reorder. Click Save Order to persist.</div>
-                  <Button size="sm" variant="secondary" onClick={saveOrder} disabled={saving}>{saving ? 'Saving…' : 'Save Order'}</Button>
+                  <div className="text-sm text-gray-600">
+                    Drag rows to reorder. Click Save Order to persist.
+                  </div>
+                  <Button size="sm" variant="secondary" onClick={saveOrder} disabled={saving}>
+                    {saving ? 'Saving…' : 'Save Order'}
+                  </Button>
                 </div>
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50">
@@ -171,15 +193,28 @@ function AdminBlogPage() {
                   </thead>
                   <tbody>
                     {posts.map((p, idx) => (
-                      <tr key={p.id} className="border-t cursor-move" draggable onDragStart={onDragStart(idx)} onDragOver={onDragOver(idx)} onDrop={onDrop(idx)}>
+                      <tr
+                        key={p.id}
+                        className="border-t cursor-move"
+                        draggable
+                        onDragStart={onDragStart(idx)}
+                        onDragOver={onDragOver(idx)}
+                        onDrop={onDrop(idx)}
+                      >
                         <td className="px-3 py-2 font-medium">{p.title}</td>
                         <td className="px-3 py-2 text-gray-600">{p.slug}</td>
-                        <td className="px-3 py-2 text-gray-600">{new Date(p.date || Date.now()).toLocaleDateString()}</td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {new Date(p.date || Date.now()).toLocaleDateString()}
+                        </td>
                         <td className="px-3 py-2 text-gray-600">{(p.tags || []).join(', ')}</td>
-                        <td className="px-3 py-2 text-gray-600">{p.isFeatured ? 'Featured' : ''} {p.isNews ? 'News' : ''}</td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {p.isFeatured ? 'Featured' : ''} {p.isNews ? 'News' : ''}
+                        </td>
                         <td className="px-3 py-2 text-gray-600">{p.status || 'published'}</td>
                         <td className="px-3 py-2 text-right">
-                          <Button variant="outline" onClick={() => editPost(p)}>Edit</Button>
+                          <Button variant="outline" onClick={() => editPost(p)}>
+                            Edit
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -197,70 +232,145 @@ function AdminBlogPage() {
               <div className="space-y-3">
                 <div>
                   <Label className="block mb-1">Title</Label>
-                  <Input value={editing.title} onChange={(e) => onField('title', e.target.value)} placeholder="Post title" />
+                  <Input
+                    value={editing.title}
+                    onChange={(e) => onField('title', e.target.value)}
+                    placeholder="Post title"
+                  />
                 </div>
                 <div>
                   <Label className="block mb-1">Category</Label>
-                  <select value={(editing as any).categoryId || ''} onChange={(e) => onField('categoryId' as any, e.target.value)} className="rounded-md border border-gray-300 px-3 py-2 bg-white">
-                    <option value="" disabled>Select category</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <select
+                    value={(editing as any).categoryId || ''}
+                    onChange={(e) => onField('categoryId' as any, e.target.value)}
+                    className="rounded-md border border-gray-300 px-3 py-2 bg-white"
+                  >
+                    <option value="" disabled>
+                      Select category
+                    </option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <Label className="block mb-1">Slug</Label>
-                  <Input value={editing.slug} onChange={(e) => onField('slug', e.target.value)} placeholder="my-post-slug" />
+                  <Input
+                    value={editing.slug}
+                    onChange={(e) => onField('slug', e.target.value)}
+                    placeholder="my-post-slug"
+                  />
                 </div>
                 <div>
                   <Label className="block mb-1">Excerpt</Label>
-                  <Input value={editing.excerpt} onChange={(e) => onField('excerpt', e.target.value)} placeholder="Short summary" />
+                  <Input
+                    value={editing.excerpt}
+                    onChange={(e) => onField('excerpt', e.target.value)}
+                    placeholder="Short summary"
+                  />
                 </div>
                 <div>
                   <Label className="block mb-1">Cover Image</Label>
-                  <Input value={editing.coverImage || ''} onChange={(e) => onField('coverImage', e.target.value)} placeholder="/images/hero/home_hero_1.JPG" />
-                  {editing.coverImage && <img src={editing.coverImage} alt="cover" className="mt-2 w-full h-40 object-cover rounded border" />}
-                  <CloudinaryUpload onUploaded={(url) => onField('coverImage', url)} className="mt-2" />
+                  <Input
+                    value={editing.coverImage || ''}
+                    onChange={(e) => onField('coverImage', e.target.value)}
+                    placeholder="/images/hero/home_hero_1.JPG"
+                  />
+                  {editing.coverImage && (
+                    <img
+                      src={editing.coverImage}
+                      alt="cover"
+                      className="mt-2 w-full h-40 object-cover rounded border"
+                    />
+                  )}
+                  <CloudinaryUpload
+                    onUploaded={(url) => onField('coverImage', url)}
+                    className="mt-2"
+                  />
                 </div>
                 <div>
                   <Label className="block mb-1">Video URL (optional, embed URL)</Label>
-                  <Input value={editing.videoUrl || ''} onChange={(e) => onField('videoUrl', e.target.value)} placeholder="https://www.youtube.com/embed/XXXXX" />
-                  <CloudinaryUpload buttonText="Upload Video" accept="video/*" onUploaded={(url) => onField('videoUrl', url)} className="mt-2" />
+                  <Input
+                    value={editing.videoUrl || ''}
+                    onChange={(e) => onField('videoUrl', e.target.value)}
+                    placeholder="https://www.youtube.com/embed/XXXXX"
+                  />
+                  <CloudinaryUpload
+                    buttonText="Upload Video"
+                    accept="video/*"
+                    onUploaded={(url) => onField('videoUrl', url)}
+                    className="mt-2"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="block mb-1">Author</Label>
-                    <Input value={editing.author || ''} onChange={(e) => onField('author', e.target.value)} placeholder="Author name" />
+                    <Input
+                      value={editing.author || ''}
+                      onChange={(e) => onField('author', e.target.value)}
+                      placeholder="Author name"
+                    />
                   </div>
                   <div>
                     <Label className="block mb-1">Date</Label>
-                    <Input type="datetime-local" value={(editing.date || '').slice(0,16)} onChange={(e) => onField('date', new Date(e.target.value).toISOString())} />
+                    <Input
+                      type="datetime-local"
+                      value={(editing.date || '').slice(0, 16)}
+                      onChange={(e) => onField('date', new Date(e.target.value).toISOString())}
+                    />
                   </div>
                 </div>
                 <div>
                   <Label className="block mb-1">Tags (comma separated)</Label>
-                  <Input value={(editing.tags || []).join(', ')} onChange={(e) => onTagChange(e.target.value)} placeholder="devotional, testimony" />
+                  <Input
+                    value={(editing.tags || []).join(', ')}
+                    onChange={(e) => onTagChange(e.target.value)}
+                    placeholder="devotional, testimony"
+                  />
                 </div>
                 <div>
                   <Label className="block mb-1">Status</Label>
-                  <select value={editing.status || 'published'} onChange={(e) => onField('status', e.target.value as any)} className="rounded-md border border-gray-300 px-3 py-2 bg-white">
+                  <select
+                    value={editing.status || 'published'}
+                    onChange={(e) => onField('status', e.target.value as any)}
+                    className="rounded-md border border-gray-300 px-3 py-2 bg-white"
+                  >
                     <option value="published">Published</option>
                     <option value="pending">Pending</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-6">
                   <label className="inline-flex items-center gap-2">
-                    <input type="checkbox" checked={!!editing.isFeatured} onChange={(e) => onField('isFeatured', e.target.checked)} />
+                    <input
+                      type="checkbox"
+                      checked={!!editing.isFeatured}
+                      onChange={(e) => onField('isFeatured', e.target.checked)}
+                    />
                     Featured
                   </label>
                   <label className="inline-flex items-center gap-2">
-                    <input type="checkbox" checked={!!editing.isNews} onChange={(e) => onField('isNews', e.target.checked)} />
+                    <input
+                      type="checkbox"
+                      checked={!!editing.isNews}
+                      onChange={(e) => onField('isNews', e.target.checked)}
+                    />
                     News
                   </label>
                 </div>
               </div>
               <div>
                 <Label className="block mb-1">Content</Label>
-                <WysiwygEditor value={editing.contentHtml} onChange={(html) => onField('contentHtml', html)} className="mb-2" />
-                <p className="text-xs text-gray-500">Tip: Use the toolbar to format. Images/videos can be uploaded via fields above and embedded as needed.</p>
+                <WysiwygEditor
+                  value={editing.contentHtml}
+                  onChange={(html) => onField('contentHtml', html)}
+                  className="mb-2"
+                />
+                <p className="text-xs text-gray-500">
+                  Tip: Use the toolbar to format. Images/videos can be uploaded via fields above and
+                  embedded as needed.
+                </p>
               </div>
             </div>
           </FadeUp>

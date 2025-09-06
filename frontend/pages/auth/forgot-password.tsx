@@ -30,7 +30,7 @@ export default function ForgotPassword() {
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
       setIsSubmitting(true);
-      
+
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
@@ -68,7 +68,7 @@ export default function ForgotPassword() {
         <title>Forgot Password | Send His Word Ministries</title>
         <meta name="description" content="Reset your password for Send His Word Ministries" />
       </Head>
-      
+
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">

@@ -1,8 +1,5 @@
 {
-  "presets": [
-    "next/babel",
-    ["@babel/preset-typescript", { "isTSX": true, "allExtensions": true }]
-  ],
+  "presets": ["next/babel", ["@babel/preset-typescript", { "isTSX": true, "allExtensions": true }]],
   "plugins": [
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
     ["@babel/plugin-proposal-class-properties", { "loose": true }],

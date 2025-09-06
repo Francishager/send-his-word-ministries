@@ -38,13 +38,18 @@ export function useNextService() {
           candidate = waiting[0];
         } else {
           // Fallback: get all and pick nearest future by start_time
-          const all = await get<ServiceDTO[]>(`/services/`, { params: { ordering: 'start_time' }, auth: false });
+          const all = await get<ServiceDTO[]>(`/services/`, {
+            params: { ordering: 'start_time' },
+            auth: false,
+          });
           const now = Date.now();
-          const future = (all || []).filter(s => {
+          const future = (all || []).filter((s) => {
             const st = parseDate(s.start_time)?.getTime();
             return st && st > now;
           });
-          future.sort((a, b) => (parseDate(a.start_time)!.getTime() - parseDate(b.start_time)!.getTime()));
+          future.sort(
+            (a, b) => parseDate(a.start_time)!.getTime() - parseDate(b.start_time)!.getTime()
+          );
           candidate = future[0] || null;
         }
         if (isMounted) setService(candidate);
@@ -63,7 +68,8 @@ export function useNextService() {
   }, []);
 
   const startDate = useMemo(() => parseDate(service?.start_time), [service?.start_time]);
-  const isLive = service?.status === 'started' || (!!startDate && startDate.getTime() <= Date.now());
+  const isLive =
+    service?.status === 'started' || (!!startDate && startDate.getTime() <= Date.now());
 
   return { loading, error, service, startDate, isLive };
 }

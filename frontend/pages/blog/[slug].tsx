@@ -43,7 +43,9 @@ export default function BlogPostPage() {
         setPost(p);
       })
       .catch(() => {});
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [slug]);
 
   React.useEffect(() => {
@@ -51,9 +53,13 @@ export default function BlogPostPage() {
     let mounted = true;
     fetch(`/api/comments?slug=${encodeURIComponent(slug)}`)
       .then((r) => r.json())
-      .then((j) => { if (mounted) setComments(j?.comments || []); })
+      .then((j) => {
+        if (mounted) setComments(j?.comments || []);
+      })
       .catch(() => {});
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [slug]);
 
   const submitComment = async (e: React.FormEvent) => {
@@ -72,7 +78,11 @@ export default function BlogPostPage() {
         videoUrl: cForm.videoUrl || undefined,
         date: new Date().toISOString(),
       };
-      const res = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to post');
       setCForm({ content: '', imageUrl: '', videoUrl: '' });
@@ -103,15 +113,25 @@ export default function BlogPostPage() {
     <MainLayout title={`${post.title} | Send His Word`} description={post.excerpt}>
       <section className="relative">
         <div className="relative">
-          <img src={post.coverImage || '/images/hero/home_hero_2.JPG'} alt={post.title} className="w-full h-[320px] object-cover" />
+          <img
+            src={post.coverImage || '/images/hero/home_hero_2.JPG'}
+            alt={post.title}
+            className="w-full h-[320px] object-cover"
+          />
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex items-end md:items-center">
             <div className="max-w-4xl mx-auto px-4 w-full text-white pb-6 md:pb-0">
               <FadeUp>
-                <div className="text-sm text-indigo-200">{new Date(post.date || Date.now()).toLocaleDateString()}</div>
+                <div className="text-sm text-indigo-200">
+                  {new Date(post.date || Date.now()).toLocaleDateString()}
+                </div>
                 <h1 className="text-3xl md:text-5xl font-extrabold">{post.title}</h1>
                 {post.excerpt && <p className="text-gray-200 mt-2 max-w-2xl">{post.excerpt}</p>}
-                {post.isNews && <span className="inline-block mt-3 text-xs rounded bg-red-100 text-red-700 px-2 py-1">News</span>}
+                {post.isNews && (
+                  <span className="inline-block mt-3 text-xs rounded bg-red-100 text-red-700 px-2 py-1">
+                    News
+                  </span>
+                )}
               </FadeUp>
             </div>
           </div>
@@ -124,13 +144,23 @@ export default function BlogPostPage() {
         </article>
         {post.videoUrl && (
           <div className="mt-6 aspect-video">
-            <iframe className="w-full h-full" src={post.videoUrl} title="post video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+            <iframe
+              className="w-full h-full"
+              src={post.videoUrl}
+              title="post video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
           </div>
         )}
 
         <div className="mt-6 flex flex-wrap gap-2">
           {(post.tags || []).map((t) => (
-            <Link key={t} href={{ pathname: '/blog', query: { tag: t } }} className="text-xs rounded bg-indigo-50 text-indigo-700 px-2 py-1">
+            <Link
+              key={t}
+              href={{ pathname: '/blog', query: { tag: t } }}
+              className="text-xs rounded bg-indigo-50 text-indigo-700 px-2 py-1"
+            >
               #{t}
             </Link>
           ))}
@@ -138,11 +168,19 @@ export default function BlogPostPage() {
 
         <div className="mt-10 flex items-center justify-between">
           {prev ? (
-            <Link href={`/blog/${prev.slug}`} className="text-indigo-600 hover:underline">← {prev.title}</Link>
-          ) : <span />}
+            <Link href={`/blog/${prev.slug}`} className="text-indigo-600 hover:underline">
+              ← {prev.title}
+            </Link>
+          ) : (
+            <span />
+          )}
           {next ? (
-            <Link href={`/blog/${next.slug}`} className="text-indigo-600 hover:underline">{next.title} →</Link>
-          ) : <span />}
+            <Link href={`/blog/${next.slug}`} className="text-indigo-600 hover:underline">
+              {next.title} →
+            </Link>
+          ) : (
+            <span />
+          )}
         </div>
 
         {/* Comments */}
@@ -151,16 +189,29 @@ export default function BlogPostPage() {
           <div className="space-y-4">
             {comments.map((c) => (
               <div key={c.id} className="rounded-lg border p-4 bg-white">
-                <div className="text-sm text-gray-500">{new Date(c.date || Date.now()).toLocaleString()} · <span className="font-medium text-gray-800">{c.name}</span></div>
+                <div className="text-sm text-gray-500">
+                  {new Date(c.date || Date.now()).toLocaleString()} ·{' '}
+                  <span className="font-medium text-gray-800">{c.name}</span>
+                </div>
                 <p className="text-gray-800 mt-1 whitespace-pre-wrap">{c.content}</p>
                 {c.imageUrl && (
                   <div className="mt-2">
-                    <img src={c.imageUrl} alt="comment attachment" className="w-full max-h-72 object-cover rounded" />
+                    <img
+                      src={c.imageUrl}
+                      alt="comment attachment"
+                      className="w-full max-h-72 object-cover rounded"
+                    />
                   </div>
                 )}
                 {c.videoUrl && (
                   <div className="mt-2 aspect-video">
-                    <iframe className="w-full h-full" src={c.videoUrl} title="comment video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                    <iframe
+                      className="w-full h-full"
+                      src={c.videoUrl}
+                      title="comment video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
                   </div>
                 )}
               </div>
@@ -176,24 +227,58 @@ export default function BlogPostPage() {
               <form onSubmit={submitComment} className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">Your Comment</label>
-                  <textarea value={cForm.content} onChange={(e) => setCForm({ ...cForm, content: e.target.value })} rows={4} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600" required />
+                  <textarea
+                    value={cForm.content}
+                    onChange={(e) => setCForm({ ...cForm, content: e.target.value })}
+                    rows={4}
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    required
+                  />
                 </div>
                 <div className="grid md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Image URL (optional)</label>
-                    <input value={cForm.imageUrl} onChange={(e) => setCForm({ ...cForm, imageUrl: e.target.value })} placeholder="https://..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
-                    <CloudinaryUpload onUploaded={(url) => setCForm((p) => ({ ...p, imageUrl: url }))} className="mt-2" />
+                    <input
+                      value={cForm.imageUrl}
+                      onChange={(e) => setCForm({ ...cForm, imageUrl: e.target.value })}
+                      placeholder="https://..."
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    />
+                    <CloudinaryUpload
+                      onUploaded={(url) => setCForm((p) => ({ ...p, imageUrl: url }))}
+                      className="mt-2"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Video Embed URL (optional)</label>
-                    <input value={cForm.videoUrl} onChange={(e) => setCForm({ ...cForm, videoUrl: e.target.value })} placeholder="https://www.youtube.com/embed/..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
-                    <CloudinaryUpload buttonText="Upload Video" accept="video/*" onUploaded={(url) => setCForm((p) => ({ ...p, videoUrl: url }))} className="mt-2" />
+                    <label className="block text-sm font-medium mb-1">
+                      Video Embed URL (optional)
+                    </label>
+                    <input
+                      value={cForm.videoUrl}
+                      onChange={(e) => setCForm({ ...cForm, videoUrl: e.target.value })}
+                      placeholder="https://www.youtube.com/embed/..."
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    />
+                    <CloudinaryUpload
+                      buttonText="Upload Video"
+                      accept="video/*"
+                      onUploaded={(url) => setCForm((p) => ({ ...p, videoUrl: url }))}
+                      className="mt-2"
+                    />
                   </div>
                 </div>
-                <button className="rounded-md bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-500">Post Comment</button>
+                <button className="rounded-md bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-500">
+                  Post Comment
+                </button>
               </form>
             ) : (
-              <div className="text-sm text-gray-700">Please <Link href="/auth/login" className="text-indigo-600 underline">log in</Link> to comment.</div>
+              <div className="text-sm text-gray-700">
+                Please{' '}
+                <Link href="/auth/login" className="text-indigo-600 underline">
+                  log in
+                </Link>{' '}
+                to comment.
+              </div>
             )}
           </div>
         </div>

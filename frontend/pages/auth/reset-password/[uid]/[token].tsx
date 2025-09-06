@@ -9,19 +9,21 @@ import Head from 'next/head';
 import { ArrowLeftIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
 
 // Define form schema with Zod
-const resetPasswordSchema = z.object({
-  new_password1: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-    ),
-  new_password2: z.string(),
-}).refine((data) => data.new_password1 === data.new_password2, {
-  message: "Passwords don't match",
-  path: ["new_password2"],
-});
+const resetPasswordSchema = z
+  .object({
+    new_password1: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/,
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      ),
+    new_password2: z.string(),
+  })
+  .refine((data) => data.new_password1 === data.new_password2, {
+    message: "Passwords don't match",
+    path: ['new_password2'],
+  });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
@@ -59,7 +61,7 @@ export default function ResetPassword() {
 
     try {
       setIsSubmitting(true);
-      
+
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
@@ -75,7 +77,9 @@ export default function ResetPassword() {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success(result.message || 'Password reset successful! You can now log in with your new password.');
+        toast.success(
+          result.message || 'Password reset successful! You can now log in with your new password.'
+        );
         // Redirect to login after a short delay
         setTimeout(() => {
           router.push('/auth/login');
@@ -142,7 +146,7 @@ export default function ResetPassword() {
         <title>Reset Password | Send His Word Ministries</title>
         <meta name="description" content="Set a new password for your account" />
       </Head>
-      
+
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -180,7 +184,8 @@ export default function ResetPassword() {
                   </p>
                 )}
                 <p className="mt-2 text-xs text-gray-500">
-                  Must be at least 8 characters with uppercase, lowercase, number, and special character.
+                  Must be at least 8 characters with uppercase, lowercase, number, and special
+                  character.
                 </p>
               </div>
 

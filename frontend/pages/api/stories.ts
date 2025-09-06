@@ -24,7 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const raw = await fs.readFile(file, 'utf8');
       const data = JSON.parse(raw);
       const parsed = StoriesSchema.safeParse(data);
-      if (!parsed.success) return res.status(500).json({ ok: false, error: 'Invalid stories data' });
+      if (!parsed.success)
+        return res.status(500).json({ ok: false, error: 'Invalid stories data' });
       return res.status(200).json({ ok: true, stories: parsed.data });
     } catch (e: any) {
       return res.status(500).json({ ok: false, error: 'Failed to read stories' });

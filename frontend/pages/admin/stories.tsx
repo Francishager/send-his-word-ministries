@@ -7,7 +7,12 @@ import { useToast } from '@/components/ui/use-toast';
 import { withAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types/user';
 
-interface StoryItem { src: string; name: string; quote: string; focus?: string; }
+interface StoryItem {
+  src: string;
+  name: string;
+  quote: string;
+  focus?: string;
+}
 
 function AdminStories() {
   const { success, error } = useToast();
@@ -29,13 +34,16 @@ function AdminStories() {
     }
   };
 
-  React.useEffect(() => { load(); }, []);
+  React.useEffect(() => {
+    load();
+  }, []);
 
   const updateItem = (idx: number, patch: Partial<StoryItem>) => {
     setStories((prev) => prev.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
   };
 
-  const addItem = () => setStories((prev) => [...prev, { src: '', name: '', quote: '', focus: '50% 30%' }]);
+  const addItem = () =>
+    setStories((prev) => [...prev, { src: '', name: '', quote: '', focus: '50% 30%' }]);
   const removeItem = (idx: number) => setStories((prev) => prev.filter((_, i) => i !== idx));
 
   const save = async () => {
@@ -62,8 +70,12 @@ function AdminStories() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Stories of Impact</h1>
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={addItem}>Add Story</Button>
-            <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</Button>
+            <Button variant="secondary" onClick={addItem}>
+              Add Story
+            </Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? 'Saving…' : 'Save Changes'}
+            </Button>
           </div>
         </div>
 
@@ -76,23 +88,41 @@ function AdminStories() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label className="block mb-1">Image src</Label>
-                    <Input value={s.src} onChange={(e) => updateItem(idx, { src: e.target.value })} placeholder="/images/hero/home_hero_1.JPG" />
+                    <Input
+                      value={s.src}
+                      onChange={(e) => updateItem(idx, { src: e.target.value })}
+                      placeholder="/images/hero/home_hero_1.JPG"
+                    />
                   </div>
                   <div>
                     <Label className="block mb-1">Focus (object-position)</Label>
-                    <Input value={s.focus || ''} onChange={(e) => updateItem(idx, { focus: e.target.value })} placeholder="50% 30%" />
+                    <Input
+                      value={s.focus || ''}
+                      onChange={(e) => updateItem(idx, { focus: e.target.value })}
+                      placeholder="50% 30%"
+                    />
                   </div>
                   <div>
                     <Label className="block mb-1">Name</Label>
-                    <Input value={s.name} onChange={(e) => updateItem(idx, { name: e.target.value })} placeholder="Name" />
+                    <Input
+                      value={s.name}
+                      onChange={(e) => updateItem(idx, { name: e.target.value })}
+                      placeholder="Name"
+                    />
                   </div>
                   <div>
                     <Label className="block mb-1">Quote</Label>
-                    <Input value={s.quote} onChange={(e) => updateItem(idx, { quote: e.target.value })} placeholder="Testimony" />
+                    <Input
+                      value={s.quote}
+                      onChange={(e) => updateItem(idx, { quote: e.target.value })}
+                      placeholder="Testimony"
+                    />
                   </div>
                 </div>
                 <div className="flex justify-end mt-3">
-                  <Button variant="outline" onClick={() => removeItem(idx)}>Remove</Button>
+                  <Button variant="outline" onClick={() => removeItem(idx)}>
+                    Remove
+                  </Button>
                 </div>
               </div>
             ))}

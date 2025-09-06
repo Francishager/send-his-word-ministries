@@ -18,7 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const parsed = contactSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ ok: false, error: 'Invalid payload', issues: parsed.error.flatten() });
+    return res
+      .status(400)
+      .json({ ok: false, error: 'Invalid payload', issues: parsed.error.flatten() });
   }
 
   const { name, email, phone, subject, message } = parsed.data;
@@ -33,7 +35,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const to = process.env.CONTACT_TO || user || from;
 
   if (!host || !user || !pass) {
-    return res.status(500).json({ ok: false, error: 'Mail service is not configured on the server.' });
+    return res
+      .status(500)
+      .json({ ok: false, error: 'Mail service is not configured on the server.' });
   }
 
   try {

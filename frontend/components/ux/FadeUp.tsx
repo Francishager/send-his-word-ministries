@@ -6,7 +6,14 @@ interface FadeUpProps extends React.HTMLAttributes<HTMLDivElement> {
   delayMs?: number;
 }
 
-export default function FadeUp({ as = 'div', threshold = 0.15, delayMs = 0, className = '', children, ...rest }: FadeUpProps) {
+export default function FadeUp({
+  as = 'div',
+  threshold = 0.15,
+  delayMs = 0,
+  className = '',
+  children,
+  ...rest
+}: FadeUpProps) {
   const Ref = React.useRef<HTMLElement | null>(null);
   const [visible, setVisible] = React.useState(false);
 

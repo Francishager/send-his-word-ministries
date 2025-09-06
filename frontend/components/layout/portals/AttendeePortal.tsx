@@ -1,15 +1,15 @@
 import { ReactNode } from 'react';
 import PortalLayout from '../PortalLayout';
-import { 
-  HomeIcon, 
-  CalendarIcon, 
-  UserGroupIcon, 
-  BookOpenIcon, 
+import {
+  HomeIcon,
+  CalendarIcon,
+  UserGroupIcon,
+  BookOpenIcon,
   ChatBubbleLeftRightIcon,
   HeartIcon,
   BellIcon,
   UserCircleIcon,
-  ClockIcon
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { UserRole } from '@/types/user';
 
@@ -18,7 +18,10 @@ interface AttendeePortalProps {
   title?: string;
 }
 
-export default function AttendeePortal({ children, title = 'Attendee Dashboard' }: AttendeePortalProps) {
+export default function AttendeePortal({
+  children,
+  title = 'Attendee Dashboard',
+}: AttendeePortalProps) {
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Live Service', href: '/live', icon: ClockIcon },
@@ -32,11 +35,7 @@ export default function AttendeePortal({ children, title = 'Attendee Dashboard' 
   ];
 
   return (
-    <PortalLayout 
-      userRole={UserRole.ATTENDEE} 
-      navItems={navItems} 
-      title={title}
-    >
+    <PortalLayout userRole={UserRole.ATTENDEE} navItems={navItems} title={title}>
       {/* Header with welcome message */}
       <div className="pb-5 border-b border-gray-200">
         <div className="md:flex md:items-center md:justify-between">
@@ -68,9 +67,7 @@ export default function AttendeePortal({ children, title = 'Attendee Dashboard' 
       </div>
 
       {/* Main content */}
-      <div className="mt-6">
-        {children}
-      </div>
+      <div className="mt-6">{children}</div>
 
       {/* Quick Stats */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -78,7 +75,12 @@ export default function AttendeePortal({ children, title = 'Attendee Dashboard' 
           { name: 'Upcoming Events', value: '3', icon: CalendarIcon, change: '+2 from last month' },
           { name: 'Prayer Requests', value: '5', icon: HeartIcon, change: '+3 from last week' },
           { name: 'Unread Messages', value: '2', icon: ChatBubbleLeftRightIcon, change: 'New' },
-          { name: 'Community Members', value: '247', icon: UserGroupIcon, change: '+12 this month' },
+          {
+            name: 'Community Members',
+            value: '247',
+            icon: UserGroupIcon,
+            change: '+12 this month',
+          },
         ].map((stat) => (
           <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">

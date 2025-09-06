@@ -29,7 +29,7 @@ export default function RequestVerification() {
   const onSubmit = async (data: RequestVerificationFormData) => {
     try {
       setIsSubmitting(true);
-      
+
       const response = await fetch('/api/auth/request-verification', {
         method: 'POST',
         headers: {
@@ -68,16 +68,16 @@ export default function RequestVerification() {
         <title>Resend Verification Email | Send His Word Ministries</title>
         <meta name="description" content="Request a new verification email" />
       </Head>
-      
+
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Resend Verification Email
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {isSubmitted 
-              ? 'Check your email for the verification link.' 
-              : 'Enter your email address and we\'ll send you a new verification link.'}
+            {isSubmitted
+              ? 'Check your email for the verification link.'
+              : "Enter your email address and we'll send you a new verification link."}
           </p>
         </div>
 
@@ -146,7 +146,8 @@ export default function RequestVerification() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-green-800">
-                      Verification email sent! Please check your inbox and click the link to verify your email address.
+                      Verification email sent! Please check your inbox and click the link to verify
+                      your email address.
                     </p>
                   </div>
                 </div>

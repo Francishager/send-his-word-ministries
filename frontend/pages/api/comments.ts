@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!slug) return res.status(400).json({ ok: false, error: 'Missing slug' });
     try {
       const raw = await fs.readFile(file, 'utf8').catch(() => '{}');
-      const store = (JSON.parse(raw || '{}')) as Record<string, any[]>;
+      const store = JSON.parse(raw || '{}') as Record<string, any[]>;
       const list = Array.isArray(store[slug]) ? store[slug] : [];
       return res.status(200).json({ ok: true, comments: list });
     } catch (e) {
@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!parsed.success) return res.status(400).json({ ok: false, error: 'Invalid comment' });
     try {
       const raw = await fs.readFile(file, 'utf8').catch(() => '{}');
-      const store = (JSON.parse(raw || '{}')) as Record<string, any[]>;
+      const store = JSON.parse(raw || '{}') as Record<string, any[]>;
       const slug = parsed.data.slug;
       store[slug] = Array.isArray(store[slug]) ? store[slug] : [];
       store[slug].push({ ...parsed.data, date: parsed.data.date || new Date().toISOString() });

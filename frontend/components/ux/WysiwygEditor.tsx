@@ -9,7 +9,12 @@ interface WysiwygEditorProps {
 }
 
 // Lightweight dependency-free WYSIWYG using contenteditable
-export default function WysiwygEditor({ value, onChange, className = '', enableImageUpload = true }: WysiwygEditorProps) {
+export default function WysiwygEditor({
+  value,
+  onChange,
+  className = '',
+  enableImageUpload = true,
+}: WysiwygEditorProps) {
   const ref = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -39,17 +44,83 @@ export default function WysiwygEditor({ value, onChange, className = '', enableI
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2 mb-2">
-        <button type="button" onClick={() => exec('bold')} className="px-2 py-1 border rounded text-sm">B</button>
-        <button type="button" onClick={() => exec('italic')} className="px-2 py-1 border rounded text-sm italic">I</button>
-        <button type="button" onClick={() => exec('underline')} className="px-2 py-1 border rounded text-sm">U</button>
-        <button type="button" onClick={() => exec('insertUnorderedList')} className="px-2 py-1 border rounded text-sm">• List</button>
-        <button type="button" onClick={() => exec('insertOrderedList')} className="px-2 py-1 border rounded text-sm">1. List</button>
-        <button type="button" onClick={() => exec('formatBlock', '<h3>')} className="px-2 py-1 border rounded text-sm">H3</button>
-        <button type="button" onClick={() => exec('formatBlock', '<p>')} className="px-2 py-1 border rounded text-sm">P</button>
-        <button type="button" onClick={() => exec('createLink', prompt('Enter URL') || '')} className="px-2 py-1 border rounded text-sm">Link</button>
-        <button type="button" onClick={() => insertImageAtCaret(prompt('Enter Image URL') || '')} className="px-2 py-1 border rounded text-sm">Image</button>
-        {enableImageUpload && <CloudinaryUpload onUploaded={insertImageAtCaret} buttonText="Upload & Insert" className="inline-block" />}
-        <button type="button" onClick={() => exec('removeFormat')} className="px-2 py-1 border rounded text-sm">Clear</button>
+        <button
+          type="button"
+          onClick={() => exec('bold')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('italic')}
+          className="px-2 py-1 border rounded text-sm italic"
+        >
+          I
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('underline')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          U
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('insertUnorderedList')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          • List
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('insertOrderedList')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          1. List
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('formatBlock', '<h3>')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          H3
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('formatBlock', '<p>')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          P
+        </button>
+        <button
+          type="button"
+          onClick={() => exec('createLink', prompt('Enter URL') || '')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          Link
+        </button>
+        <button
+          type="button"
+          onClick={() => insertImageAtCaret(prompt('Enter Image URL') || '')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          Image
+        </button>
+        {enableImageUpload && (
+          <CloudinaryUpload
+            onUploaded={insertImageAtCaret}
+            buttonText="Upload & Insert"
+            className="inline-block"
+          />
+        )}
+        <button
+          type="button"
+          onClick={() => exec('removeFormat')}
+          className="px-2 py-1 border rounded text-sm"
+        >
+          Clear
+        </button>
       </div>
       <div
         ref={ref}

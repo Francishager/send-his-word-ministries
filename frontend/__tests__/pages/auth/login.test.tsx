@@ -26,7 +26,7 @@ describe('LoginPage', () => {
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
-    
+
     // Setup default mock implementations
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
@@ -54,7 +54,7 @@ describe('LoginPage', () => {
 
   it('renders login form', () => {
     render(<LoginPage />);
-    
+
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('LoginPage', () => {
 
   it('validates form inputs', async () => {
     render(<LoginPage />);
-    
+
     const submitButton = screen.getByRole('button', { name: 'Sign In' });
     fireEvent.click(submitButton);
 
@@ -74,18 +74,18 @@ describe('LoginPage', () => {
 
   it('handles successful login', async () => {
     mockSignIn.mockResolvedValueOnce({});
-    
+
     render(<LoginPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
 
@@ -111,18 +111,18 @@ describe('LoginPage', () => {
   it('handles login error', async () => {
     const errorMessage = 'Invalid credentials';
     mockSignIn.mockRejectedValueOnce(new Error(errorMessage));
-    
+
     render(<LoginPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: 'wrongpassword' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
 
@@ -142,20 +142,20 @@ describe('LoginPage', () => {
       push: mockPush,
       query: { callbackUrl },
     });
-    
+
     mockSignIn.mockResolvedValueOnce({});
-    
+
     render(<LoginPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
 
@@ -174,26 +174,26 @@ describe('LoginPage', () => {
           resolveSignIn = resolve;
         })
     );
-    
+
     render(<LoginPage />);
-    
+
     // Fill in the form
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: 'password123' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
-    
+
     // Check if button is in loading state
     const button = screen.getByRole('button', { name: 'Sign In' });
     expect(button).toBeDisabled();
     expect(button).toHaveTextContent('Sign In');
-    
+
     // Resolve the promise
     await waitFor(() => {
       resolveSignIn!({});
@@ -211,9 +211,9 @@ describe('LoginPage', () => {
       refreshSession: jest.fn(),
       hasRole: jest.fn(),
     });
-    
+
     render(<LoginPage />);
-    
+
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
@@ -228,37 +228,37 @@ describe('LoginPage', () => {
       refreshSession: jest.fn(),
       hasRole: jest.fn(),
     });
-    
+
     render(<LoginPage />);
-    
+
     expect(screen.getByText('Checking authentication status...')).toBeInTheDocument();
   });
 
   it('handles password reset flow', async () => {
     render(<LoginPage />);
-    
+
     // Click on forgot password link
     const forgotPasswordLink = screen.getByText('Forgot password?');
     fireEvent.click(forgotPasswordLink);
-    
+
     // Check if password reset form is shown
     expect(screen.getByText('Reset your password')).toBeInTheDocument();
-    
+
     // Fill in email for password reset
     const emailInput = screen.getByLabelText('Email');
     fireEvent.input(emailInput, {
       target: { value: 'test@example.com' },
     });
-    
+
     // Submit password reset
     const resetButton = screen.getByRole('button', { name: 'Send reset link' });
     fireEvent.click(resetButton);
-    
+
     // Check if password reset was requested
     await waitFor(() => {
       expect(mockUseAuth().requestPasswordReset).toHaveBeenCalledWith('test@example.com');
     });
-    
+
     // Check if success message is shown
     expect(mockToastFn).toHaveBeenCalledWith({
       title: 'Reset link sent',
@@ -268,7 +268,7 @@ describe('LoginPage', () => {
 
   it('handles social login buttons', async () => {
     render(<LoginPage />);
-    
+
     // Test Google login
     const googleButton = screen.getByRole('button', { name: /continue with google/i });
     fireEvent.click(googleButton);
@@ -276,7 +276,7 @@ describe('LoginPage', () => {
       provider: 'google',
       callbackUrl: '/dashboard',
     });
-    
+
     // Test GitHub login
     const githubButton = screen.getByRole('button', { name: /continue with github/i });
     fireEvent.click(githubButton);
@@ -289,18 +289,18 @@ describe('LoginPage', () => {
   it('shows error when password reset fails', async () => {
     const errorMessage = 'Failed to send reset email';
     mockUseAuth().requestPasswordReset.mockRejectedValueOnce(new Error(errorMessage));
-    
+
     render(<LoginPage />);
-    
+
     // Go to password reset
     fireEvent.click(screen.getByText('Forgot password?'));
-    
+
     // Submit form
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
-    
+
     // Check error handling
     await waitFor(() => {
       expect(mockToastFn).toHaveBeenCalledWith({
@@ -313,20 +313,20 @@ describe('LoginPage', () => {
 
   it('handles remember me functionality', async () => {
     mockSignIn.mockResolvedValueOnce({});
-    
+
     render(<LoginPage />);
-    
+
     // Fill in the form with remember me checked
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'test@example.com' },
     });
-    
+
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: 'password123' },
     });
-    
+
     fireEvent.click(screen.getByLabelText('Remember me'));
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
 
@@ -342,41 +342,41 @@ describe('LoginPage', () => {
 
   it('shows validation errors for invalid email format', async () => {
     render(<LoginPage />);
-    
+
     // Enter invalid email
     fireEvent.input(screen.getByLabelText('Email'), {
       target: { value: 'invalid-email' },
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
-    
+
     // Check for validation error
     expect(await screen.findByText('Please enter a valid email address')).toBeInTheDocument();
   });
 
   it('shows validation errors for short password', async () => {
     render(<LoginPage />);
-    
+
     // Enter short password
     fireEvent.input(screen.getByLabelText('Password'), {
       target: { value: '12345' }, // Less than 6 characters
     });
-    
+
     // Submit the form
     fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
-    
+
     // Check for validation error
     expect(await screen.findByText('Password must be at least 6 characters')).toBeInTheDocument();
   });
 
   it('navigates to register page when clicking sign up link', () => {
     render(<LoginPage />);
-    
+
     // Click on sign up link
     const signUpLink = screen.getByRole('link', { name: /sign up/i });
     fireEvent.click(signUpLink);
-    
+
     // Check if navigation occurred
     expect(mockPush).toHaveBeenCalledWith('/auth/register');
   });
@@ -393,9 +393,9 @@ describe('LoginPage', () => {
       refreshSession: jest.fn(),
       hasRole: jest.fn(),
     });
-    
+
     render(<LoginPage />);
-    
+
     // Check if error toast was shown
     expect(mockToastFn).toHaveBeenCalledWith({
       title: 'Error',

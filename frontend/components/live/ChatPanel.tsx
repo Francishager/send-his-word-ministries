@@ -10,23 +10,25 @@ interface ChatMessage {
   ts?: string;
 }
 
-export default function ChatPanel({ serviceId, canPost = false }: { serviceId: string; canPost?: boolean }) {
+export default function ChatPanel({
+  serviceId,
+  canPost = false,
+}: {
+  serviceId: string;
+  canPost?: boolean;
+}) {
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [text, setText] = React.useState('');
 
-  const { ready, error, send } = useWebSocket(
-    () => chatWsUrl(serviceId),
-    [serviceId],
-    {
-      onMessage: (msg) => {
-        if (msg?.type === 'chat.message') {
-          setMessages((prev) => [...prev, { text: msg.text, user: msg.user, ts: msg.ts }]);
-        } else if (msg?.type === 'error') {
-          toast.error('Chat error: ' + (msg.detail || 'Unknown error'));
-        }
-      },
-    }
-  );
+  const { ready, error, send } = useWebSocket(() => chatWsUrl(serviceId), [serviceId], {
+    onMessage: (msg) => {
+      if (msg?.type === 'chat.message') {
+        setMessages((prev) => [...prev, { text: msg.text, user: msg.user, ts: msg.ts }]);
+      } else if (msg?.type === 'error') {
+        toast.error('Chat error: ' + (msg.detail || 'Unknown error'));
+      }
+    },
+  });
 
   React.useEffect(() => {
     if (error) toast.error(error);
@@ -61,7 +63,11 @@ export default function ChatPanel({ serviceId, canPost = false }: { serviceId: s
               placeholder={ready ? 'Type your message…' : 'Connecting…'}
               className="flex-1 rounded border px-3 py-2"
             />
-            <button onClick={onSend} className="rounded bg-indigo-600 text-white px-3 py-2" disabled={!ready || !text.trim()}>
+            <button
+              onClick={onSend}
+              className="rounded bg-indigo-600 text-white px-3 py-2"
+              disabled={!ready || !text.trim()}
+            >
               Send
             </button>
           </div>

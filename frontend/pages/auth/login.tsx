@@ -62,8 +62,9 @@ export default function LoginPage() {
       const redirectUrl = Array.isArray(callbackUrl) ? callbackUrl[0] : callbackUrl || '/dashboard';
       router.push(redirectUrl);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred during login';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred during login';
+
       toastError(`Login failed: ${errorMessage}`);
 
       // Set form error for specific field if available
@@ -111,7 +112,8 @@ export default function LoginPage() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;The unfolding of your words gives light; it imparts understanding to the simple.&rdquo;
+              &ldquo;The unfolding of your words gives light; it imparts understanding to the
+              simple.&rdquo;
             </p>
             <footer className="text-sm">Psalm 119:130</footer>
           </blockquote>
@@ -143,9 +145,7 @@ export default function LoginPage() {
                     {...register('email')}
                   />
                   {errors.email && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.email.message}
-                    </p>
+                    <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
                   )}
                 </div>
 
@@ -185,9 +185,7 @@ export default function LoginPage() {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </div>
@@ -198,9 +196,7 @@ export default function LoginPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
 
@@ -238,10 +234,7 @@ export default function LoginPage() {
 
           <p className="px-8 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link
-              href="/auth/register"
-              className="underline underline-offset-4 hover:text-primary"
-            >
+            <Link href="/auth/register" className="underline underline-offset-4 hover:text-primary">
               Sign up
             </Link>
           </p>

@@ -27,7 +27,11 @@ export function useWebSocket(
     onMessage,
     serialize = JSON.stringify,
     parse = (data: string) => {
-      try { return JSON.parse(data); } catch { return data; }
+      try {
+        return JSON.parse(data);
+      } catch {
+        return data;
+      }
     },
     reconnectDelayMs = 2000,
     maxReconnects = 0,
@@ -79,12 +83,15 @@ export function useWebSocket(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps); // re-connect when deps change
 
-  const send = useCallback((data: any) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return false;
-    const out = typeof data === 'string' ? data : serialize(data);
-    wsRef.current.send(out);
-    return true;
-  }, [serialize]);
+  const send = useCallback(
+    (data: any) => {
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return false;
+      const out = typeof data === 'string' ? data : serialize(data);
+      wsRef.current.send(out);
+      return true;
+    },
+    [serialize]
+  );
 
   return { ready, error, send };
 }

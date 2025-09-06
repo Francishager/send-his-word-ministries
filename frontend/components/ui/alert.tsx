@@ -27,18 +27,24 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 );
 Alert.displayName = 'Alert';
 
-export const AlertTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h5 ref={ref} className={clsx('mb-1 font-semibold leading-none tracking-tight', className)} {...props} />
-  )
-);
+export const AlertTitle = React.forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h5
+    ref={ref}
+    className={clsx('mb-1 font-semibold leading-none tracking-tight', className)}
+    {...props}
+  />
+));
 AlertTitle.displayName = 'AlertTitle';
 
-export const AlertDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={clsx('text-sm opacity-90', className)} {...props} />
-  )
-);
+export const AlertDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p ref={ref} className={clsx('text-sm opacity-90', className)} {...props} />
+));
 AlertDescription.displayName = 'AlertDescription';
 
 export default Alert;

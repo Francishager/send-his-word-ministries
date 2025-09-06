@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import PortalLayout from '../PortalLayout';
-import { 
+import {
   HomeIcon,
   UserGroupIcon,
   CalendarIcon,
@@ -16,7 +16,7 @@ import {
   ClockIcon,
   MegaphoneIcon,
   CurrencyDollarIcon,
-  BookOpenIcon
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { UserRole } from '@/types/user';
 
@@ -25,45 +25,46 @@ interface MinisterAdminPortalProps {
   title?: string;
 }
 
-export default function MinisterAdminPortal({ 
-  children, 
-  title = 'Ministry Admin Dashboard' 
+export default function MinisterAdminPortal({
+  children,
+  title = 'Ministry Admin Dashboard',
 }: MinisterAdminPortalProps) {
   const navItems = [
     // Dashboard & Overview
     { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-    
+
     // Content Management
     { name: 'Live Stream', href: '/admin/live', icon: VideoCameraIcon },
     { name: 'Sermons', href: '/admin/sermons', icon: BookOpenIcon },
     { name: 'Events', href: '/admin/events', icon: CalendarIcon },
     { name: 'Announcements', href: '/admin/announcements', icon: MegaphoneIcon },
-    
+
     // Community & Engagement
     { name: 'Members', href: '/admin/members', icon: UserGroupIcon },
     { name: 'Prayer Requests', href: '/admin/prayer-requests', icon: ChatBubbleLeftRightIcon },
     { name: 'Small Groups', href: '/admin/groups', icon: UserGroupIcon },
-    
+
     // Communication
     { name: 'Messages', href: '/admin/messages', icon: EnvelopeIcon },
     { name: 'Notifications', href: '/admin/notifications', icon: BellIcon },
-    
+
     // Administration
-    { name: 'User Management', href: '/admin/users', icon: ShieldCheckIcon, roles: [UserRole.ADMIN] },
+    {
+      name: 'User Management',
+      href: '/admin/users',
+      icon: ShieldCheckIcon,
+      roles: [UserRole.ADMIN],
+    },
     { name: 'Donations', href: '/admin/donations', icon: CurrencyDollarIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/admin/settings', icon: CogIcon },
-    
+
     // User
     { name: 'My Profile', href: '/admin/profile', icon: UserCircleIcon },
   ];
 
   return (
-    <PortalLayout 
-      userRole={UserRole.ADMIN} 
-      navItems={navItems} 
-      title={title}
-    >
+    <PortalLayout userRole={UserRole.ADMIN} navItems={navItems} title={title}>
       {/* Header with quick actions */}
       <div className="pb-5 border-b border-gray-200">
         <div className="md:flex md:items-center md:justify-between">
@@ -97,15 +98,27 @@ export default function MinisterAdminPortal({
       {/* Stats */}
       <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { name: 'Total Members', value: '1,234', icon: UserGroupIcon, change: '+12% from last month' },
+          {
+            name: 'Total Members',
+            value: '1,234',
+            icon: UserGroupIcon,
+            change: '+12% from last month',
+          },
           { name: 'Live Viewers', value: '247', icon: ClockIcon, change: 'Live Now', isLive: true },
           { name: 'Prayer Requests', value: '24', icon: ChatBubbleLeftRightIcon, change: '+5 new' },
-          { name: 'This Week\'s Giving', value: '$8,450', icon: CurrencyDollarIcon, change: '+24% from last week' },
+          {
+            name: "This Week's Giving",
+            value: '$8,450',
+            icon: CurrencyDollarIcon,
+            change: '+24% from last week',
+          },
         ].map((stat) => (
           <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
-                <div className={`flex-shrink-0 rounded-md p-3 ${stat.isLive ? 'bg-red-500' : 'bg-indigo-500'}`}>
+                <div
+                  className={`flex-shrink-0 rounded-md p-3 ${stat.isLive ? 'bg-red-500' : 'bg-indigo-500'}`}
+                >
                   <stat.icon className="h-6 w-6 text-white" aria-hidden="true" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
@@ -118,7 +131,9 @@ export default function MinisterAdminPortal({
                 </div>
               </div>
               <div className="mt-4">
-                <span className={`text-sm ${stat.isLive ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+                <span
+                  className={`text-sm ${stat.isLive ? 'text-red-600 font-medium' : 'text-gray-500'}`}
+                >
                   {stat.change}
                 </span>
               </div>
@@ -128,9 +143,7 @@ export default function MinisterAdminPortal({
       </div>
 
       {/* Main content */}
-      <div className="mt-8">
-        {children}
-      </div>
+      <div className="mt-8">{children}</div>
 
       {/* Recent Activity */}
       <div className="mt-8">
@@ -138,11 +151,41 @@ export default function MinisterAdminPortal({
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {[
-              { id: 1, user: 'John Doe', action: 'joined the ministry', time: '5 min ago', icon: UserGroupIcon },
-              { id: 2, user: 'Sarah Johnson', action: 'requested prayer', time: '1 hour ago', icon: ChatBubbleLeftRightIcon },
-              { id: 3, user: 'Michael Brown', action: 'donated $100', time: '2 hours ago', icon: CurrencyDollarIcon },
-              { id: 4, user: 'Emily Davis', action: 'registered for Sunday Service', time: '5 hours ago', icon: CalendarIcon },
-              { id: 5, user: 'Robert Wilson', action: 'sent a message', time: '1 day ago', icon: EnvelopeIcon },
+              {
+                id: 1,
+                user: 'John Doe',
+                action: 'joined the ministry',
+                time: '5 min ago',
+                icon: UserGroupIcon,
+              },
+              {
+                id: 2,
+                user: 'Sarah Johnson',
+                action: 'requested prayer',
+                time: '1 hour ago',
+                icon: ChatBubbleLeftRightIcon,
+              },
+              {
+                id: 3,
+                user: 'Michael Brown',
+                action: 'donated $100',
+                time: '2 hours ago',
+                icon: CurrencyDollarIcon,
+              },
+              {
+                id: 4,
+                user: 'Emily Davis',
+                action: 'registered for Sunday Service',
+                time: '5 hours ago',
+                icon: CalendarIcon,
+              },
+              {
+                id: 5,
+                user: 'Robert Wilson',
+                action: 'sent a message',
+                time: '1 day ago',
+                icon: EnvelopeIcon,
+              },
             ].map((activity) => (
               <li key={activity.id}>
                 <div className="px-4 py-4 flex items-center sm:px-6">
@@ -158,9 +201,7 @@ export default function MinisterAdminPortal({
                           {activity.user}{' '}
                           <span className="text-gray-500 font-normal">{activity.action}</span>
                         </p>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {activity.time}
-                        </p>
+                        <p className="mt-1 text-sm text-gray-500">{activity.time}</p>
                       </div>
                     </div>
                   </div>

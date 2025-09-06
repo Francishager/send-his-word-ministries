@@ -63,31 +63,44 @@ export default function LivePage() {
 
       <section className="max-w-6xl mx-auto px-4 py-8">
         {error && (
-          <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-red-700">{error}</div>
+          <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-red-700">
+            {error}
+          </div>
         )}
         {!isLive ? (
           <FadeUp className="text-center">
-            <h2 className="text-2xl font-semibold mb-1">Next service{service?.title ? `: ${service.title}` : ''}</h2>
-            {startDate && (
-              <p className="text-gray-600">Starts at {startDate.toLocaleString()}</p>
-            )}
+            <h2 className="text-2xl font-semibold mb-1">
+              Next service{service?.title ? `: ${service.title}` : ''}
+            </h2>
+            {startDate && <p className="text-gray-600">Starts at {startDate.toLocaleString()}</p>}
             <div className="mt-4 mx-auto max-w-xl rounded-2xl border border-gray-700 bg-gray-900/95 p-4 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]">
               <div className="text-xs tracking-widest text-gray-400">LIVE IN</div>
               <div className="mt-2 flex justify-center gap-3 sm:gap-4">
-                {([
-                  { label: 'Days', value: c.days },
-                  { label: 'Hours', value: c.hours },
-                  { label: 'Minutes', value: c.minutes },
-                  { label: 'Seconds', value: c.seconds },
-                ] as const).map((item) => (
-                  <div key={item.label} className="rounded-md bg-black/40 border border-indigo-500/30 px-4 py-3 min-w-[84px] text-center">
-                    <div className="font-mono text-3xl font-extrabold text-indigo-200 leading-none">{item.value.toString().padStart(2, '0')}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-indigo-300/80 mt-1">{item.label}</div>
+                {(
+                  [
+                    { label: 'Days', value: c.days },
+                    { label: 'Hours', value: c.hours },
+                    { label: 'Minutes', value: c.minutes },
+                    { label: 'Seconds', value: c.seconds },
+                  ] as const
+                ).map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-md bg-black/40 border border-indigo-500/30 px-4 py-3 min-w-[84px] text-center"
+                  >
+                    <div className="font-mono text-3xl font-extrabold text-indigo-200 leading-none">
+                      {item.value.toString().padStart(2, '0')}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-indigo-300/80 mt-1">
+                      {item.label}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-            <p className="mt-4 text-gray-600">This page will automatically switch to the livestream when we go live.</p>
+            <p className="mt-4 text-gray-600">
+              This page will automatically switch to the livestream when we go live.
+            </p>
           </FadeUp>
         ) : (
           <div className="grid lg:grid-cols-3 gap-6">
@@ -97,7 +110,9 @@ export default function LivePage() {
                 {canRenderPlayer ? (
                   <LivePlayer provider={provider} sourceIdOrUrl={source} />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white">Live Player</div>
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    Live Player
+                  </div>
                 )}
               </FadeUp>
               {/* Service details / actions */}
@@ -105,7 +120,11 @@ export default function LivePage() {
                 <div>
                   <div className="text-sm text-gray-500">Now Streaming</div>
                   <h3 className="text-xl font-semibold">{service?.title || 'Live Service'}</h3>
-                  {startDate && <div className="text-xs text-gray-500">Started at {startDate.toLocaleString()}</div>}
+                  {startDate && (
+                    <div className="text-xs text-gray-500">
+                      Started at {startDate.toLocaleString()}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <button className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
@@ -114,7 +133,10 @@ export default function LivePage() {
                   <button className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
                     <Heart className="h-4 w-4" /> Bless
                   </button>
-                  <a href={typeof window !== 'undefined' ? window.location.href : '/live'} className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm">
+                  <a
+                    href={typeof window !== 'undefined' ? window.location.href : '/live'}
+                    className="inline-flex items-center gap-1 rounded-md border px-3 py-2 text-sm"
+                  >
                     <Share2 className="h-4 w-4" /> Share
                   </a>
                 </div>
@@ -136,7 +158,7 @@ export default function LivePage() {
               <FadeUp className="bg-white rounded-xl border p-4 text-sm text-gray-600">
                 <div className="flex items-center justify-between">
                   <div>Viewers</div>
-                  <div className="font-semibold">~ {Math.floor(Math.random()*200)+50}</div>
+                  <div className="font-semibold">~ {Math.floor(Math.random() * 200) + 50}</div>
                 </div>
               </FadeUp>
             </aside>
@@ -150,12 +172,22 @@ export default function LivePage() {
 // Simple tab button and panels (local to this page)
 function TabButton({ active, children }: { active?: boolean; children: React.ReactNode }) {
   return (
-    <button className={`flex-1 px-4 py-2 text-sm font-medium ${active ? 'text-indigo-700 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>{children}</button>
+    <button
+      className={`flex-1 px-4 py-2 text-sm font-medium ${active ? 'text-indigo-700 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+    >
+      {children}
+    </button>
   );
 }
 
-function TabbedPanels({ serviceId, isAuthenticated }: { serviceId?: string; isAuthenticated: boolean }) {
-  const [tab, setTab] = React.useState<'chat'|'prayer'>('chat');
+function TabbedPanels({
+  serviceId,
+  isAuthenticated,
+}: {
+  serviceId?: string;
+  isAuthenticated: boolean;
+}) {
+  const [tab, setTab] = React.useState<'chat' | 'prayer'>('chat');
   return (
     <div>
       <div className="hidden" aria-hidden>
@@ -167,7 +199,10 @@ function TabbedPanels({ serviceId, isAuthenticated }: { serviceId?: string; isAu
             <>
               {!isAuthenticated && (
                 <div className="mb-2 text-sm text-gray-600">
-                  <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to participate.
+                  <a href="/auth/login" className="text-indigo-600 underline">
+                    Sign in
+                  </a>{' '}
+                  to participate.
                 </div>
               )}
               <ChatPanel serviceId={serviceId} canPost={isAuthenticated} />
@@ -179,7 +214,10 @@ function TabbedPanels({ serviceId, isAuthenticated }: { serviceId?: string; isAu
           <>
             {!isAuthenticated && (
               <div className="mb-2 text-sm text-gray-600">
-                <a href="/auth/login" className="text-indigo-600 underline">Sign in</a> to request prayer.
+                <a href="/auth/login" className="text-indigo-600 underline">
+                  Sign in
+                </a>{' '}
+                to request prayer.
               </div>
             )}
             <PrayerQueue canRequest={isAuthenticated} />
@@ -188,8 +226,18 @@ function TabbedPanels({ serviceId, isAuthenticated }: { serviceId?: string; isAu
       </div>
       {/* Tab controls (mobile/desktop consistent) */}
       <div className="flex gap-2 mt-3">
-        <button onClick={() => setTab('chat')} className={`flex-1 rounded-md px-3 py-2 text-sm ${tab==='chat' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Chat</button>
-        <button onClick={() => setTab('prayer')} className={`flex-1 rounded-md px-3 py-2 text-sm ${tab==='prayer' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}>Prayer</button>
+        <button
+          onClick={() => setTab('chat')}
+          className={`flex-1 rounded-md px-3 py-2 text-sm ${tab === 'chat' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Chat
+        </button>
+        <button
+          onClick={() => setTab('prayer')}
+          className={`flex-1 rounded-md px-3 py-2 text-sm ${tab === 'prayer' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+        >
+          Prayer
+        </button>
       </div>
     </div>
   );

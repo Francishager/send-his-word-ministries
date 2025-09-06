@@ -140,10 +140,7 @@ export const waitForLoadingToFinish = async (delay = 0) => {
 };
 
 // Helper to test form submission
-export const submitForm = async (
-  form: HTMLElement,
-  values: Record<string, any>
-) => {
+export const submitForm = async (form: HTMLElement, values: Record<string, any>) => {
   // Fill in form fields
   Object.entries(values).forEach(([name, value]) => {
     const input = form.querySelector(`[name="${name}"]`);
@@ -185,11 +182,7 @@ export const TestErrorBoundary = ({
   children: React.ReactNode;
   onError: (error: Error, errorInfo: React.ErrorInfo) => void;
 }) => {
-  return (
-    <ErrorBoundaryProvider onError={onError}>
-      {children}
-    </ErrorBoundaryProvider>
-  );
+  return <ErrorBoundaryProvider onError={onError}>{children}</ErrorBoundaryProvider>;
 };
 
 // Helper to test protected routes

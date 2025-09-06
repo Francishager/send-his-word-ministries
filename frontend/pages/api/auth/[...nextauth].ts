@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
               refreshToken: user.refresh,
             };
           }
-          
+
           // Return null if user data could not be retrieved
           return null;
         } catch (error) {

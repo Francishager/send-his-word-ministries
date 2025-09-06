@@ -25,7 +25,12 @@ type ContactForm = z.infer<typeof contactSchema>;
 export default function ContactPage() {
   const { toast, error, success } = useToast();
   const [loading, setLoading] = React.useState(false);
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<ContactForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
     defaultValues: { consent: false },
   });
@@ -55,7 +60,11 @@ export default function ContactPage() {
     <MainLayout title="Contact | Send His Word">
       <section className="relative">
         <div className="relative">
-          <img src="/images/hero/home-1.svg" alt="Contact" className="w-full h-[280px] object-cover" />
+          <img
+            src="/images/hero/home-1.svg"
+            alt="Contact"
+            className="w-full h-[280px] object-cover"
+          />
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex items-center justify-center">
             <FadeUp>
@@ -69,7 +78,10 @@ export default function ContactPage() {
         <div>
           <FadeUp>
             <h2 className="text-2xl font-bold mb-3">Get in Touch</h2>
-            <p className="text-gray-700 mb-6">Have a prayer request, testimony, or question? Send us a message and our team will respond promptly.</p>
+            <p className="text-gray-700 mb-6">
+              Have a prayer request, testimony, or question? Send us a message and our team will
+              respond promptly.
+            </p>
           </FadeUp>
           <FadeUp delayMs={80}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -81,8 +93,15 @@ export default function ContactPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
-                  {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    {...register('email')}
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone (optional)</Label>
@@ -92,22 +111,40 @@ export default function ContactPage() {
               <div>
                 <Label htmlFor="subject">Subject</Label>
                 <Input id="subject" placeholder="How can we help?" {...register('subject')} />
-                {errors.subject && <p className="text-sm text-red-600 mt-1">{errors.subject.message}</p>}
+                {errors.subject && (
+                  <p className="text-sm text-red-600 mt-1">{errors.subject.message}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="message">Message</Label>
-                <textarea id="message" rows={6} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600" placeholder="Write your message here..." {...register('message')} />
-                {errors.message && <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>}
+                <textarea
+                  id="message"
+                  rows={6}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  placeholder="Write your message here..."
+                  {...register('message')}
+                />
+                {errors.message && (
+                  <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox id="consent" {...register('consent')} />
                 <Label htmlFor="consent">I agree to the privacy policy</Label>
               </div>
-              {errors.consent && <p className="text-sm text-red-600 -mt-2">{errors.consent.message as string}</p>}
+              {errors.consent && (
+                <p className="text-sm text-red-600 -mt-2">{errors.consent.message as string}</p>
+              )}
 
               <div className="pt-2">
                 <Button type="submit" disabled={loading}>
-                  {loading ? <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Sending...</span> : 'Send Message'}
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Sending...
+                    </span>
+                  ) : (
+                    'Send Message'
+                  )}
                 </Button>
               </div>
             </form>
@@ -117,9 +154,15 @@ export default function ContactPage() {
         <div>
           <h2 className="text-2xl font-bold mb-3">Contact Information</h2>
           <div className="space-y-3 text-gray-700">
-            <p><strong>Email:</strong> info@sendhisword.org</p>
-            <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-            <p><strong>Address:</strong> 123 Hope Street, Kampala, UG</p>
+            <p>
+              <strong>Email:</strong> info@sendhisword.org
+            </p>
+            <p>
+              <strong>Phone:</strong> +1 (555) 123-4567
+            </p>
+            <p>
+              <strong>Address:</strong> 123 Hope Street, Kampala, UG
+            </p>
           </div>
           <div className="mt-6">
             <div className="aspect-video w-full rounded-lg overflow-hidden border">

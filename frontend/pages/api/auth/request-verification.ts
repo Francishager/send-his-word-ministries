@@ -1,10 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken } from 'next-auth/react';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -13,7 +10,7 @@ export default async function handler(
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         message: 'Email is required',
         field: 'email',
@@ -39,7 +36,8 @@ export default async function handler(
     // Always return success to prevent email enumeration attacks
     return res.status(200).json({
       success: true,
-      message: 'If your email is registered and not already verified, you will receive a new verification email shortly.',
+      message:
+        'If your email is registered and not already verified, you will receive a new verification email shortly.',
     });
   } catch (error) {
     console.error('Request verification email error:', error);

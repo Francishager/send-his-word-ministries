@@ -29,7 +29,12 @@ function buildEmbedUrl(provider: LiveProvider, sourceIdOrUrl: string): string {
   }
 }
 
-const LivePlayer: React.FC<LivePlayerProps> = ({ provider, sourceIdOrUrl, title = 'Live Player', className = '' }) => {
+const LivePlayer: React.FC<LivePlayerProps> = ({
+  provider,
+  sourceIdOrUrl,
+  title = 'Live Player',
+  className = '',
+}) => {
   const src = buildEmbedUrl(provider, sourceIdOrUrl);
   if (!src) return null;
 

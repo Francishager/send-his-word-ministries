@@ -46,10 +46,7 @@ async function requestInterceptor(options: RequestOptions): Promise<RequestInit>
 }
 
 // Response interceptor
-async function responseInterceptor<T>(
-  response: Response,
-  options: RequestOptions
-): Promise<T> {
+async function responseInterceptor<T>(response: Response, options: RequestOptions): Promise<T> {
   // Handle empty responses (e.g., 204 No Content)
   if (response.status === 204) {
     return {} as T;
@@ -70,8 +67,7 @@ async function responseInterceptor<T>(
 
 // Error handler
 function handleApiError(error: any, options: RequestOptions) {
-  const errorMessage =
-    options.errorMessage || error.message || 'An unexpected error occurred';
+  const errorMessage = options.errorMessage || error.message || 'An unexpected error occurred';
 
   if (options.handleError !== false) {
     toast.error(errorMessage);
@@ -104,12 +100,7 @@ async function withRetry<T>(
     return await fn();
   } catch (error: any) {
     // Don't retry for 4xx errors except 429 (Too Many Requests)
-    if (
-      error.status >= 400 &&
-      error.status < 500 &&
-      error.status !== 429 &&
-      error.status !== 408
-    ) {
+    if (error.status >= 400 && error.status < 500 && error.status !== 429 && error.status !== 408) {
       throw error;
     }
 
@@ -118,7 +109,7 @@ async function withRetry<T>(
     }
 
     // Exponential backoff
-    const delayTime = delay * (2 ** (3 - retries));
+    const delayTime = delay * 2 ** (3 - retries);
     await new Promise((resolve) => setTimeout(resolve, delayTime));
     return withRetry(fn, retries - 1, delay);
   }

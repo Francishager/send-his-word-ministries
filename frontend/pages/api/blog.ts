@@ -17,7 +17,7 @@ const BlogPost = z.object({
   tags: z.array(z.string()).optional().default([]),
   isFeatured: z.boolean().optional().default(false),
   isNews: z.boolean().optional().default(false),
-  status: z.enum(['published','pending']).optional().default('published'),
+  status: z.enum(['published', 'pending']).optional().default('published'),
 });
 const BlogSchema = z.array(BlogPost);
 
@@ -64,9 +64,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!parsed.success) return res.status(400).json({ ok: false, error: 'Invalid post' });
     try {
       const raw = await fs.readFile(file, 'utf8').catch(() => '[]');
-      const list = (JSON.parse(raw || '[]') as any[]);
+      const list = JSON.parse(raw || '[]') as any[];
       const idx = list.findIndex((p) => p.slug === parsed.data.slug);
-      if (idx >= 0) list[idx] = parsed.data; else list.push(parsed.data);
+      if (idx >= 0) list[idx] = parsed.data;
+      else list.push(parsed.data);
       await fs.writeFile(file, JSON.stringify(list, null, 2), 'utf8');
       return res.status(200).json({ ok: true, post: parsed.data });
     } catch {

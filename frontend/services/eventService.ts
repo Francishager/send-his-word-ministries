@@ -88,7 +88,7 @@ export const eventService = {
   uploadEventImage: async (eventId: string, file: File): Promise<{ imageUrl: string }> => {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     return post<{ imageUrl: string }>(`/events/${eventId}/upload/`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

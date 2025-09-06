@@ -9,7 +9,11 @@ interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  signIn: (credentials: { email: string; password: string; rememberMe?: boolean }) => Promise<SignInResponse | undefined>;
+  signIn: (credentials: {
+    email: string;
+    password: string;
+    rememberMe?: boolean;
+  }) => Promise<SignInResponse | undefined>;
   signOut: () => Promise<void>;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
   isAuthenticated: boolean;
@@ -31,15 +35,21 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
   const router = useRouter();
 
   // Check if user has the required role(s)
-  const hasRole = useCallback((roles: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
-    
-    const requiredRoles = Array.isArray(roles) ? roles : [roles];
-    return requiredRoles.some(role => user.roles.includes(role));
-  }, [user]);
+  const hasRole = useCallback(
+    (roles: UserRole | UserRole[]): boolean => {
+      if (!user) return false;
+
+      const requiredRoles = Array.isArray(roles) ? roles : [roles];
+      return requiredRoles.some((role) => user.roles.includes(role));
+    },
+    [user]
+  );
 
   // Refresh the access token using the refresh token
-  const refreshToken = useCallback(async (): Promise<{ accessToken: string; refreshToken: string } | null> => {
+  const refreshToken = useCallback(async (): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  } | null> => {
     try {
       const session = await getSession();
       if (!session?.refreshToken) return null;
@@ -67,10 +77,14 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
   }, []);
 
   // Handle sign in
-  const handleSignIn = async (credentials: { email: string; password: string; rememberMe?: boolean }) => {
+  const handleSignIn = async (credentials: {
+    email: string;
+    password: string;
+    rememberMe?: boolean;
+  }) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await signIn('credentials', {
         redirect: false,

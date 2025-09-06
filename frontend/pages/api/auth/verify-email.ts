@@ -1,10 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken } from 'next-auth/react';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -13,7 +10,7 @@ export default async function handler(
     const { key } = req.body; // The verification key from the URL
 
     if (!key) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         message: 'Verification key is required',
       });
@@ -44,7 +41,7 @@ export default async function handler(
 
     // Handle different error statuses
     const errorData = await response.json().catch(() => ({}));
-    
+
     if (response.status === 400) {
       return res.status(400).json({
         success: false,

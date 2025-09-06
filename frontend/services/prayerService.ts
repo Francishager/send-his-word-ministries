@@ -83,10 +83,7 @@ export const prayerService = {
     return get<PrayerRequestComment[]>(`/prayer-requests/${requestId}/comments/`);
   },
 
-  addComment: async (
-    requestId: string,
-    content: string
-  ): Promise<PrayerRequestComment> => {
+  addComment: async (requestId: string, content: string): Promise<PrayerRequestComment> => {
     return post<PrayerRequestComment>(`/prayer-requests/${requestId}/comments/`, { content });
   },
 

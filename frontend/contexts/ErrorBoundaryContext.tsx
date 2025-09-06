@@ -27,9 +27,7 @@ export function ErrorBoundaryProvider({ children, onError }: ErrorBoundaryProvid
       setErrorInfo(errorInfo);
 
       // Show error toast to user
-      toast.error(
-        error.message || 'An unexpected error occurred. Our team has been notified.'
-      );
+      toast.error(error.message || 'An unexpected error occurred. Our team has been notified.');
 
       // Call the provided error handler if any
       if (onError) {
@@ -71,9 +69,7 @@ export function ErrorBoundaryProvider({ children, onError }: ErrorBoundaryProvid
 
   return (
     <ErrorBoundaryContext.Provider value={{ error, errorInfo, handleError, resetError }}>
-      <ReactErrorBoundary onError={handleError}>
-        {children}
-      </ReactErrorBoundary>
+      <ReactErrorBoundary onError={handleError}>{children}</ReactErrorBoundary>
     </ErrorBoundaryContext.Provider>
   );
 }
@@ -94,7 +90,11 @@ export function withErrorBoundary<P>(
   return function WithErrorBoundary(props: P) {
     return (
       <ErrorBoundaryProvider>
-        <ErrorBoundaryWrapper Component={Component} FallbackComponent={FallbackComponent} {...props} />
+        <ErrorBoundaryWrapper
+          Component={Component}
+          FallbackComponent={FallbackComponent}
+          {...props}
+        />
       </ErrorBoundaryProvider>
     );
   };

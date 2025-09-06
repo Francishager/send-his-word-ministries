@@ -28,15 +28,15 @@ export default function VerifyEmail() {
 
         const data = await response.json();
 
-      if (response.ok) {
-        setStatus('success');
-        setMessage(data.message || 'Email verified successfully!');
-        toast.success('Email verified successfully!');
-      } else {
-        setStatus('error');
-        setMessage(data.message || 'Failed to verify email. The link may be invalid or expired.');
-        toast.error(data.message || 'Failed to verify email');
-      }
+        if (response.ok) {
+          setStatus('success');
+          setMessage(data.message || 'Email verified successfully!');
+          toast.success('Email verified successfully!');
+        } else {
+          setStatus('error');
+          setMessage(data.message || 'Failed to verify email. The link may be invalid or expired.');
+          toast.error(data.message || 'Failed to verify email');
+        }
       } catch (error) {
         console.error('Verification error:', error);
         setStatus('error');
@@ -73,7 +73,7 @@ export default function VerifyEmail() {
         <title>Verify Email | Send His Word Ministries</title>
         <meta name="description" content="Verify your email address" />
       </Head>
-      
+
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
@@ -81,9 +81,7 @@ export default function VerifyEmail() {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               {status === 'success' ? 'Email Verified!' : 'Verifying Email...'}
             </h2>
-            <p className="mt-2 text-center text-lg text-gray-600">
-              {message}
-            </p>
+            <p className="mt-2 text-center text-lg text-gray-600">{message}</p>
           </div>
 
           <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
@@ -96,7 +94,8 @@ export default function VerifyEmail() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm font-medium text-green-800">
-                        Your email has been verified successfully! You can now log in to your account.
+                        Your email has been verified successfully! You can now log in to your
+                        account.
                       </p>
                     </div>
                   </div>
@@ -111,13 +110,11 @@ export default function VerifyEmail() {
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-red-800">
-                        {status === 'invalid' 
-                          ? 'Invalid verification link' 
+                        {status === 'invalid'
+                          ? 'Invalid verification link'
                           : 'Could not verify your email'}
                       </h3>
-                      <p className="mt-2 text-sm text-red-700">
-                        {message}
-                      </p>
+                      <p className="mt-2 text-sm text-red-700">{message}</p>
                     </div>
                   </div>
                 </div>
@@ -137,8 +134,8 @@ export default function VerifyEmail() {
                 <div className="text-center text-sm">
                   <p className="text-gray-600">
                     Need a new verification email?{' '}
-                    <Link 
-                      href="/auth/request-verification" 
+                    <Link
+                      href="/auth/request-verification"
                       className="font-medium text-indigo-600 hover:text-indigo-500"
                     >
                       Request a new one

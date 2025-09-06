@@ -21,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const raw = await fs.readFile(file, 'utf8');
       const data = JSON.parse(raw);
       const parsed = HighlightsSchema.safeParse(data);
-      if (!parsed.success) return res.status(500).json({ ok: false, error: 'Invalid highlights data' });
+      if (!parsed.success)
+        return res.status(500).json({ ok: false, error: 'Invalid highlights data' });
       return res.status(200).json({ ok: true, highlights: parsed.data });
     } catch (e: any) {
       return res.status(500).json({ ok: false, error: 'Failed to read highlights' });

@@ -17,7 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const raw = await fs.readFile(file, 'utf8');
       const data = JSON.parse(raw || '[]');
       const parsed = Categories.safeParse(data);
-      if (!parsed.success) return res.status(500).json({ ok: false, error: 'Invalid categories data' });
+      if (!parsed.success)
+        return res.status(500).json({ ok: false, error: 'Invalid categories data' });
       return res.status(200).json({ ok: true, categories: parsed.data });
     } catch (e) {
       return res.status(200).json({ ok: true, categories: [] });

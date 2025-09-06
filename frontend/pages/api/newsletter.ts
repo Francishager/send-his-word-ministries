@@ -5,7 +5,8 @@ import nodemailer from 'nodemailer';
 const schema = z.object({ email: z.string().email() });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  if (req.method !== 'POST')
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ ok: false, error: 'Invalid email' });
@@ -21,7 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const to = process.env.CONTACT_TO || user || from;
 
   if (!host || !user || !pass) {
-    return res.status(500).json({ ok: false, error: 'Mail service is not configured on the server.' });
+    return res
+      .status(500)
+      .json({ ok: false, error: 'Mail service is not configured on the server.' });
   }
 
   try {

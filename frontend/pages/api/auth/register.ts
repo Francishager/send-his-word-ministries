@@ -2,10 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getCsrfToken } from 'next-auth/react';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -15,9 +12,9 @@ export default async function handler(
 
     // Basic validation
     if (!email || !password || !firstName || !lastName) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'Missing required fields',
-        required: ['email', 'password', 'firstName', 'lastName']
+        required: ['email', 'password', 'firstName', 'lastName'],
       });
     }
 
@@ -64,8 +61,8 @@ export default async function handler(
 
     if (!loginResponse.ok) {
       // Registration succeeded but auto-login failed
-      return res.status(200).json({ 
-        success: true, 
+      return res.status(200).json({
+        success: true,
         message: 'Registration successful. Please log in.',
         redirectTo: '/auth/login',
       });
@@ -82,10 +79,9 @@ export default async function handler(
         refresh: userData.refresh,
       },
     });
-
   } catch (error) {
     console.error('Registration error:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       message: 'An error occurred during registration',
       error: error instanceof Error ? error.message : 'Unknown error',
     });

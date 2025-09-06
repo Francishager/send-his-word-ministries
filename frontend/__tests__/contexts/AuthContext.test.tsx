@@ -35,9 +35,7 @@ const TestComponent = () => {
       <div data-testid="loading">{loading ? 'Loading...' : 'Not loading'}</div>
       <div data-testid="error">{error}</div>
       <div data-testid="isAuthenticated">{isAuthenticated ? 'Yes' : 'No'}</div>
-      <div data-testid="isAdmin">
-        {hasRole(UserRole.ADMIN) ? 'Admin' : 'Not Admin'}
-      </div>
+      <div data-testid="isAdmin">{hasRole(UserRole.ADMIN) ? 'Admin' : 'Not Admin'}</div>
       <button onClick={() => login({ email: 'test@example.com', password: 'password' })}>
         Sign In
       </button>
@@ -51,7 +49,7 @@ describe('AuthContext', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
-    
+
     // Default mock session
     mockGetSession.mockResolvedValue({
       user: {
@@ -65,7 +63,7 @@ describe('AuthContext', () => {
       },
       expires: '2024-01-01T00:00:00.000Z',
     });
-    
+
     // Default mock API response
     mockGet.mockResolvedValue({
       id: '123',
@@ -95,7 +93,7 @@ describe('AuthContext', () => {
 
   it('handles successful sign in', async () => {
     mockSignIn.mockResolvedValueOnce({ ok: true });
-    
+
     render(
       <AuthProvider>
         <TestComponent />
@@ -128,7 +126,7 @@ describe('AuthContext', () => {
 
   it('handles sign out', async () => {
     mockSignOut.mockResolvedValueOnce({});
-    
+
     render(
       <AuthProvider>
         <TestComponent />
@@ -166,7 +164,7 @@ describe('AuthContext', () => {
         roles: [UserRole.ADMIN],
       },
     });
-    
+
     render(
       <AuthProvider>
         <TestComponent />
@@ -205,7 +203,7 @@ describe('AuthContext', () => {
   it('handles sign in error', async () => {
     const errorMessage = 'Invalid credentials';
     mockSignIn.mockRejectedValueOnce(new Error(errorMessage));
-    
+
     render(
       <AuthProvider>
         <TestComponent />

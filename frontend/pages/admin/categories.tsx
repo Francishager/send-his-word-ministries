@@ -7,7 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import FadeUp from '@/components/ux/FadeUp';
 
-interface Category { id: string; name: string }
+interface Category {
+  id: string;
+  name: string;
+}
 
 function AdminCategoriesPage() {
   const [items, setItems] = React.useState<Category[]>([]);
@@ -27,7 +30,9 @@ function AdminCategoriesPage() {
     }
   };
 
-  React.useEffect(() => { load(); }, []);
+  React.useEffect(() => {
+    load();
+  }, []);
 
   const add = () => {
     if (!draft.id || !draft.name) return;
@@ -40,7 +45,8 @@ function AdminCategoriesPage() {
   };
 
   const remove = (id: string) => setItems((prev) => prev.filter((c) => c.id !== id));
-  const update = (idx: number, patch: Partial<Category>) => setItems((prev) => prev.map((c, i) => i === idx ? { ...c, ...patch } : c));
+  const update = (idx: number, patch: Partial<Category>) =>
+    setItems((prev) => prev.map((c, i) => (i === idx ? { ...c, ...patch } : c)));
 
   // DnD handlers
   const onDragStart = (index: number) => (e: React.DragEvent) => {
@@ -67,7 +73,11 @@ function AdminCategoriesPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/categories', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categories: items }) });
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories: items }),
+      });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to save');
       alert('Saved categories');
@@ -83,7 +93,9 @@ function AdminCategoriesPage() {
       <section className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Categories</h1>
-          <Button onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </Button>
         </div>
 
         <FadeUp>
@@ -91,15 +103,33 @@ function AdminCategoriesPage() {
             <div className="grid md:grid-cols-3 gap-3">
               <div>
                 <Label className="block mb-1">ID (slug)</Label>
-                <Input value={draft.id} onChange={(e) => setDraft((p) => ({ ...p, id: e.target.value.trim().toLowerCase().replace(/[^a-z0-9-_]+/g, '-') }))} placeholder="devotionals" />
+                <Input
+                  value={draft.id}
+                  onChange={(e) =>
+                    setDraft((p) => ({
+                      ...p,
+                      id: e.target.value
+                        .trim()
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-_]+/g, '-'),
+                    }))
+                  }
+                  placeholder="devotionals"
+                />
               </div>
               <div className="md:col-span-2">
                 <Label className="block mb-1">Name</Label>
-                <Input value={draft.name} onChange={(e) => setDraft((p) => ({ ...p, name: e.target.value }))} placeholder="Devotionals" />
+                <Input
+                  value={draft.name}
+                  onChange={(e) => setDraft((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Devotionals"
+                />
               </div>
             </div>
             <div className="mt-3">
-              <Button variant="secondary" onClick={add}>Add Category</Button>
+              <Button variant="secondary" onClick={add}>
+                Add Category
+              </Button>
             </div>
           </div>
         </FadeUp>
@@ -119,7 +149,8 @@ function AdminCategoriesPage() {
                 </thead>
                 <tbody>
                   {items.map((c, idx) => (
-                    <tr key={c.id}
+                    <tr
+                      key={c.id}
                       className="border-t cursor-move"
                       draggable
                       onDragStart={onDragStart(idx)}
@@ -128,10 +159,15 @@ function AdminCategoriesPage() {
                     >
                       <td className="px-3 py-2 text-gray-700">{c.id}</td>
                       <td className="px-3 py-2">
-                        <Input value={c.name} onChange={(e) => update(idx, { name: e.target.value })} />
+                        <Input
+                          value={c.name}
+                          onChange={(e) => update(idx, { name: e.target.value })}
+                        />
                       </td>
                       <td className="px-3 py-2 text-right">
-                        <Button variant="outline" onClick={() => remove(c.id)}>Remove</Button>
+                        <Button variant="outline" onClick={() => remove(c.id)}>
+                          Remove
+                        </Button>
                       </td>
                     </tr>
                   ))}

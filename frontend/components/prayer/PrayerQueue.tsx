@@ -13,23 +13,19 @@ interface QueueItem {
 export default function PrayerQueue({ canRequest = false }: { canRequest?: boolean }) {
   const [queue, setQueue] = React.useState<QueueItem[]>([]);
 
-  const { ready, error, send } = useWebSocket(
-    () => prayerQueueWsUrl(),
-    [],
-    {
-      onMessage: (msg) => {
-        if (msg?.type === 'queue.snapshot') {
-          setQueue(msg.items || []);
-        } else if (msg?.type === 'queue.joined') {
-          setQueue((prev) => [...prev, msg.item]);
-        } else if (msg?.type === 'queue.updated') {
-          setQueue((prev) => prev.map((q) => (q.id === msg.item?.id ? { ...q, ...msg.item } : q)));
-        } else if (msg?.type === 'error') {
-          toast.error('Prayer queue error: ' + (msg.detail || 'Unknown error'));
-        }
-      },
-    }
-  );
+  const { ready, error, send } = useWebSocket(() => prayerQueueWsUrl(), [], {
+    onMessage: (msg) => {
+      if (msg?.type === 'queue.snapshot') {
+        setQueue(msg.items || []);
+      } else if (msg?.type === 'queue.joined') {
+        setQueue((prev) => [...prev, msg.item]);
+      } else if (msg?.type === 'queue.updated') {
+        setQueue((prev) => prev.map((q) => (q.id === msg.item?.id ? { ...q, ...msg.item } : q)));
+      } else if (msg?.type === 'error') {
+        toast.error('Prayer queue error: ' + (msg.detail || 'Unknown error'));
+      }
+    },
+  });
 
   React.useEffect(() => {
     if (error) toast.error(error);
@@ -45,13 +41,19 @@ export default function PrayerQueue({ canRequest = false }: { canRequest?: boole
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-lg font-semibold">Prayer Queue</h3>
         {canRequest && (
-          <button onClick={onRequestPrayer} disabled={!ready} className="rounded bg-indigo-600 text-white px-3 py-1.5">
+          <button
+            onClick={onRequestPrayer}
+            disabled={!ready}
+            className="rounded bg-indigo-600 text-white px-3 py-1.5"
+          >
             Request Prayer
           </button>
         )}
       </div>
       <div className="rounded border bg-white divide-y">
-        {queue.length === 0 && <div className="p-3 text-gray-600 text-sm">No one in queue yet.</div>}
+        {queue.length === 0 && (
+          <div className="p-3 text-gray-600 text-sm">No one in queue yet.</div>
+        )}
         {queue.map((item) => (
           <div key={item.id} className="p-3 flex items-center justify-between">
             <div>

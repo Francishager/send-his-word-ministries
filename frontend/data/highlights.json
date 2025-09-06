@@ -1,7 +1,27 @@
 [
-  { "src": "/images/hero/home_hero_1.JPG", "title": "Worship Night", "subtitle": "A powerful time in God's presence" },
-  { "src": "/images/hero/home_hero_2.JPG", "title": "Prayer & Intercession", "subtitle": "Standing in the gap together" },
-  { "src": "/images/hero/home_hero_3.JPG", "title": "Community Outreach", "subtitle": "Serving with love and compassion" },
-  { "src": "/images/hero/home_hero_4.JPG", "title": "Youth Sunday", "subtitle": "Raising a generation for Jesus" },
-  { "src": "/images/hero/home_hero_5.JPG", "title": "Testimonies", "subtitle": "Stories of God's faithfulness" }
+  {
+    "src": "/images/hero/home_hero_1.JPG",
+    "title": "Worship Night",
+    "subtitle": "A powerful time in God's presence"
+  },
+  {
+    "src": "/images/hero/home_hero_2.JPG",
+    "title": "Prayer & Intercession",
+    "subtitle": "Standing in the gap together"
+  },
+  {
+    "src": "/images/hero/home_hero_3.JPG",
+    "title": "Community Outreach",
+    "subtitle": "Serving with love and compassion"
+  },
+  {
+    "src": "/images/hero/home_hero_4.JPG",
+    "title": "Youth Sunday",
+    "subtitle": "Raising a generation for Jesus"
+  },
+  {
+    "src": "/images/hero/home_hero_5.JPG",
+    "title": "Testimonies",
+    "subtitle": "Stories of God's faithfulness"
+  }
 ]

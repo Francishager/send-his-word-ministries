@@ -10,10 +10,7 @@ interface ResetPasswordRequest extends NextApiRequest {
   };
 }
 
-export default async function handler(
-  req: ResetPasswordRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: ResetPasswordRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
@@ -71,7 +68,8 @@ export default async function handler(
     if (response.ok) {
       return res.status(200).json({
         success: true,
-        message: 'Your password has been reset successfully. You can now log in with your new password.',
+        message:
+          'Your password has been reset successfully. You can now log in with your new password.',
       });
     }
 

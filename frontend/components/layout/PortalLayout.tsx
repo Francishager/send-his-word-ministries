@@ -16,18 +16,16 @@ interface PortalLayoutProps {
   title?: string;
 }
 
-export default function PortalLayout({ 
-  children, 
-  userRole, 
-  navItems, 
-  title = 'Send His Word Portal' 
+export default function PortalLayout({
+  children,
+  userRole,
+  navItems,
+  title = 'Send His Word Portal',
 }: PortalLayoutProps) {
   const router = useRouter();
-  
+
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(
-    (item) => !item.roles || item.roles.includes(userRole)
-  );
+  const filteredNavItems = navItems.filter((item) => !item.roles || item.roles.includes(userRole));
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -62,14 +60,12 @@ export default function PortalLayout({
                 );
               })}
             </nav>
-            
+
             {/* User profile section */}
             <div className="p-4 mt-auto">
               <div className="flex items-center">
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-white">
-                    {userRole} Portal
-                  </p>
+                  <p className="text-sm font-medium text-white">{userRole} Portal</p>
                   <button
                     onClick={() => signOut({ callbackUrl: '/' })}
                     className="text-xs font-medium text-indigo-200 hover:text-white"
@@ -143,9 +139,7 @@ export default function PortalLayout({
             <div className="flex-shrink-0 flex border-t border-indigo-700 p-4">
               <div className="flex items-center">
                 <div>
-                  <p className="text-sm font-medium text-white">
-                    {userRole} Portal
-                  </p>
+                  <p className="text-sm font-medium text-white">{userRole} Portal</p>
                   <button
                     onClick={() => signOut({ callbackUrl: '/' })}
                     className="text-xs font-medium text-indigo-200 hover:text-white"
@@ -191,9 +185,7 @@ export default function PortalLayout({
                 </svg>
               </button>
             </div>
-            <div className="text-lg font-medium text-gray-900">
-              {title}
-            </div>
+            <div className="text-lg font-medium text-gray-900">{title}</div>
             <div className="w-6"></div> {/* For balance */}
           </div>
         </div>
@@ -201,9 +193,7 @@ export default function PortalLayout({
         {/* Page content */}
         <main className="flex-1 overflow-y-auto focus:outline-none">
           <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              {children}
-            </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">{children}</div>
           </div>
         </main>
       </div>

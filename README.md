@@ -1,6 +1,7 @@
 # Send His Word Ministries
 
-A modern web application for Send His Word Ministries built with Next.js, TypeScript, and Tailwind CSS.
+A modern web application for Send His Word Ministries built with Next.js, TypeScript, and Tailwind
+CSS.
 
 ## 🚀 Getting Started
 
@@ -13,20 +14,24 @@ A modern web application for Send His Word Ministries built with Next.js, TypeSc
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/send-his-word-ministries.git
    cd send-his-word-ministries
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    ```
+
    Update the environment variables in `.env.local` with your configuration.
 
 4. **Run the development server**
