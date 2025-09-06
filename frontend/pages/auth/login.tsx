@@ -28,6 +28,8 @@ export default function LoginPage() {
   const { success, error: toastError } = useToast();
   const { signIn, isAuthenticated, loading: authLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const devEmail = process.env.NEXT_PUBLIC_DEV_LOGIN_EMAIL || '';
+  const devPassword = process.env.NEXT_PUBLIC_DEV_LOGIN_PASSWORD || '';
   const { callbackUrl } = router.query;
 
   const {
@@ -74,6 +76,24 @@ export default function LoginPage() {
           message: errorMessage,
         });
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const devLogin = async () => {
+    if (!devEmail || !devPassword) {
+      toastError('Dev credentials are not configured');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await signIn({ email: devEmail, password: devPassword, rememberMe: true });
+      success('Logged in as Dev');
+      const redirectUrl = Array.isArray(callbackUrl) ? callbackUrl[0] : callbackUrl || '/dashboard';
+      router.push(redirectUrl);
+    } catch (e: any) {
+      toastError(e?.message || 'Dev login failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -230,6 +250,12 @@ export default function LoginPage() {
               </svg>
               Google
             </Button>
+            {devEmail && devPassword && (
+              <Button variant="secondary" type="button" onClick={devLogin} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Dev Login
+              </Button>
+            )}
           </div>
 
           <p className="px-8 text-center text-sm text-muted-foreground">

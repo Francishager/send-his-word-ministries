@@ -3,8 +3,18 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { JWT } from 'next-auth/jwt';
 import { User } from '@/types/user';
 
-// API URL from environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Resolve absolute API base for server-side NextAuth calls
+function resolveApiBase(): string {
+  const backend = process.env.BACKEND_URL; // e.g., http://localhost:8000/api
+  if (backend && /^https?:\/\//i.test(backend)) return backend.replace(/\/$/, '');
+  const publicApi = process.env.NEXT_PUBLIC_API_URL;
+  if (publicApi && /^https?:\/\//i.test(publicApi)) return publicApi.replace(/\/$/, '');
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const base = (publicApi && publicApi.startsWith('/')) ? `${site.replace(/\/$/, '')}${publicApi}` : (publicApi || 'http://localhost:8000/api');
+  return base.replace(/\/$/, '');
+}
+
+const API_URL = resolveApiBase();
 
 // Extend the default session type
 declare module 'next-auth' {
