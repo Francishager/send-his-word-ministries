@@ -2,6 +2,7 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import FadeUp from '@/components/ux/FadeUp';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Post {
@@ -36,6 +37,22 @@ function useBlog() {
       mounted = false;
     };
   }, []);
+
+  // Initialize category from URL (?category=...)
+  React.useEffect(() => {
+    const q = (router.query?.category as string) || '';
+    if (q && q !== categoryId) {
+      setCategoryId(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query?.category]);
+
+  const updateCategory = (id: string) => {
+    setCategoryId(id);
+    const nextQuery: Record<string, any> = { ...router.query };
+    if (id) nextQuery.category = id; else delete nextQuery.category;
+    router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true });
+  };
   return { posts, loading };
 }
 
@@ -46,6 +63,7 @@ export default function BlogIndexPage() {
   const [categoryId, setCategoryId] = React.useState<string>('');
   const [categories, setCategories] = React.useState<{ id: string; name: string }[]>([]);
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   React.useEffect(() => {
     fetch('/api/categories')
@@ -225,7 +243,22 @@ export default function BlogIndexPage() {
       )}
 
       <section className="max-w-6xl mx-auto px-4 pb-16 grid lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 lg:order-1">
+          {/* Mobile categories dropdown */}
+          <div className="lg:hidden mb-3 flex items-center gap-2">
+            <label htmlFor="mobile-category" className="text-sm text-gray-700">All categories</label>
+            <select
+              id="mobile-category"
+              value={categoryId}
+              onChange={(e) => updateCategory(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-2 bg-white text-sm flex-1"
+            >
+              <option value="">All</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
           <h2 className="text-2xl font-bold mb-4 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">
             All Posts
           </h2>
@@ -264,13 +297,13 @@ export default function BlogIndexPage() {
             ))}
           </div>
         </div>
-        <aside id="categories-sidebar">
+        <aside id="categories-sidebar" className="lg:order-2">
           <div className="rounded-xl border bg-white p-4 sticky top-20">
             <h3 className="font-semibold mb-2">Categories</h3>
             <ul className="space-y-1 text-sm">
               <li>
                 <button
-                  onClick={() => setCategoryId('')}
+                  onClick={() => updateCategory('')}
                   className={`hover:underline ${categoryId === '' ? 'font-semibold text-indigo-700' : ''}`}
                 >
                   All
@@ -279,7 +312,7 @@ export default function BlogIndexPage() {
               {categories.map((c) => (
                 <li key={c.id}>
                   <button
-                    onClick={() => setCategoryId(c.id)}
+                    onClick={() => updateCategory(c.id)}
                     className={`hover:underline ${categoryId === c.id ? 'font-semibold text-indigo-700' : ''}`}
                   >
                     {c.name}

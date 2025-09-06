@@ -99,4 +99,70 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [Prisma Documentation](https://www.prisma.io/docs/)
+
+## 💳 Payments (Stripe, Pesapal, M-Pesa)
+
+This app supports multiple payment providers. All transactions are completed on the providers' platforms for security; our server creates sessions/orders and handles callbacks.
+
+### Stripe
+
+- Frontend pages:
+  - `frontend/pages/give.tsx` and `frontend/pages/donate.tsx` support currency and Stripe Checkout.
+  - Success page: `/payments/success`
+  - Cancel page: `/payments/cancel`
+- API routes:
+  - Create session: `POST /api/payments/stripe/create-session`
+  - Webhook: `POST /api/payments/stripe/webhook`
+- Required env:
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `NEXT_PUBLIC_SITE_URL` (used to build success/cancel URLs)
+- Optional quick links (bypass server):
+  - `NEXT_PUBLIC_STRIPE_LINK`
+
+Set webhook endpoint in Stripe Dashboard to:
+
+```
+https://<your-site>/api/payments/stripe/webhook
+```
+
+### Pesapal (Placeholder scaffold)
+
+- API routes:
+  - Create order: `POST /api/payments/pesapal/create-order`
+  - Callback: `GET|POST /api/payments/pesapal/callback`
+- Env:
+  - `PESAPAL_CONSUMER_KEY`
+  - `PESAPAL_CONSUMER_SECRET`
+  - `PESAPAL_CALLBACK_URL` (optional; defaults to site callback)
+
+Configure Pesapal to call back to:
+
+```
+https://<your-site>/api/payments/pesapal/callback
+```
+
+### M-Pesa (Placeholder scaffold)
+
+- API routes:
+  - STK Push: `POST /api/payments/mpesa/stk-push`
+  - Callback: `POST /api/payments/mpesa/callback`
+- Env:
+  - `MPESA_CONSUMER_KEY`
+  - `MPESA_CONSUMER_SECRET`
+  - `MPESA_SHORTCODE`
+  - `MPESA_PASSKEY`
+  - `MPESA_CALLBACK_URL` (optional; defaults to site callback)
+
+Configure M-Pesa callback to:
+
+```
+https://<your-site>/api/payments/mpesa/callback
+```
+
+### Notes
+
+- Stripe webhook requires raw body parsing; see `frontend/pages/api/payments/stripe/webhook.ts`.
+- The Pesapal and M-Pesa endpoints here are scaffolds and do not process funds — they are intended to initiate provider-side flows and receive confirmations.
+- For production, ensure your environment variables are set in your hosting provider and HTTPS is enabled.
 - [React Query Documentation](https://tanstack.com/query/latest)
