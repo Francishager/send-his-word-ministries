@@ -32,7 +32,7 @@ export default function ContactPage() {
     reset,
   } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { consent: false },
+    defaultValues: { consent: true },
   });
 
   const onSubmit: SubmitHandler<ContactForm> = async (data) => {
