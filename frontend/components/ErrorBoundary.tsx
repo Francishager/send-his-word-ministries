@@ -85,20 +85,19 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 // Higher-order component for functional components
-export function withErrorBoundary<P>(
+export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>
-): React.FC<P> {
-  const Wrapped: React.FC<P> = (props) => (
+): React.ComponentType<P> {
+  const Wrapped = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
-      <Component {...props} />
+      <Component {...(props as P)} />
     </ErrorBoundary>
   );
-  
 
   // Format for display in DevTools
-  const name = Component.displayName || Component.name || 'Component';
-  Wrapped.displayName = `withErrorBoundary(${name})`;
+  const name = (Component as any).displayName || (Component as any).name || 'Component';
+  (Wrapped as any).displayName = `withErrorBoundary(${name})`;
 
-  return Wrapped;
+  return Wrapped as React.ComponentType<P>;
 }
