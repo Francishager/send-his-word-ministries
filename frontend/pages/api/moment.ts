@@ -10,6 +10,9 @@ const MomentSchema = z.object({
   ctaHref: z.string().optional(),
   image: z.string().optional(),
   videoUrl: z.string().url().optional(),
+  autoplay: z.boolean().optional(),
+  muted: z.boolean().optional(),
+  loop: z.boolean().optional(),
 });
 
 function dataPath() {

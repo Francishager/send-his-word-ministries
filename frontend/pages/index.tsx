@@ -1,5 +1,6 @@
 import MainLayout from '@/components/layout/MainLayout';
 import HeroSlider, { HeroSlide } from '@/components/hero/HeroSlider';
+import FadeUp from '@/components/ux/FadeUp';
 import Link from 'next/link';
 import React from 'react';
 import useNextService from '@/hooks/useNextService';
@@ -61,6 +62,27 @@ function useServiceMoment() {
   return { moment, loading };
 }
 
+function getYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) {
+      return u.pathname.replace('/', '');
+    }
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/shorts/')) {
+        return u.pathname.split('/shorts/')[1]?.split('/')[0] || null;
+      }
+      if (u.pathname === '/watch') {
+        return u.searchParams.get('v');
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function toYouTubeEmbed(url?: string): string | null {
   if (!url) return null;
   try {
@@ -92,56 +114,64 @@ function toYouTubeEmbed(url?: string): string | null {
 export default function HomePage() {
   const { service, startDate, isLive } = useNextService();
   const { moment } = useServiceMoment();
+  const [momentPlaying, setMomentPlaying] = React.useState(false);
+  const [highlights, setHighlights] = React.useState<any[]>([]);
+  React.useEffect(() => {
+    fetch('/api/highlights')
+      .then((r) => r.json())
+      .then((j) => setHighlights(Array.isArray(j?.highlights) ? j.highlights : []))
+      .catch(() => {});
+  }, []);
   return (
     <MainLayout>
       <HeroSlider slides={slides} autoAdvanceMs={2000} />
 
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-lg border bg-gray-50">
+          <FadeUp className="p-6 rounded-lg border bg-gray-50">
             <h3 className="text-xl font-semibold mb-2">Worship Together</h3>
             <p className="text-gray-600 mb-4">Join our livestream with countdown, auto-switch, and replay with synced chat.</p>
             <Link className="text-indigo-600 font-medium" href="/live">Go to Live</Link>
-          </div>
-          <div className="p-6 rounded-lg border bg-gray-50">
+          </FadeUp>
+          <FadeUp className="p-6 rounded-lg border bg-gray-50" delayMs={80}>
             <h3 className="text-xl font-semibold mb-2">Request Prayer</h3>
-            <p className="text-gray-600 mb-4">Public prayer wall and private 1:1 rooms with triage and care.</p>
-            <Link className="text-indigo-600 font-medium" href="/auth/login">Sign In</Link>
-          </div>
-          <div className="p-6 rounded-lg border bg-gray-50">
+            <p className="text-gray-600 mb-4">Our ministers would love to stand with you in prayer and faith.</p>
+            <Link className="text-indigo-600 font-medium" href="/live#prayer">Ask for Prayer</Link>
+          </FadeUp>
+          <FadeUp className="p-6 rounded-lg border bg-gray-50" delayMs={140}>
             <h3 className="text-xl font-semibold mb-2">Give</h3>
-            <p className="text-gray-600 mb-4">Support through Mobile Money and card rails via Stripe/PesaPal.</p>
-            <Link className="text-indigo-600 font-medium" href="/auth/login">Start Giving</Link>
-          </div>
+            <p className="text-gray-600 mb-4">Partner with the mission and help us reach more people.</p>
+            <Link className="text-indigo-600 font-medium" href="/give">Partner with Us</Link>
+          </FadeUp>
         </div>
       </section>
 
       {/* Stats strip */}
-      <section className="bg-indigo-600 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center">
+      <section className="py-12 bg-indigo-600 text-white">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <FadeUp>
+            <div className="text-3xl font-extrabold">120k+</div>
+            <div className="text-indigo-100 text-sm">Prayers prayed</div>
+          </FadeUp>
+          <FadeUp delayMs={80}>
             <div className="text-3xl font-extrabold">10k+</div>
-            <div className="text-indigo-100 text-sm">Livestream attendees</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-extrabold">3k+</div>
-            <div className="text-indigo-100 text-sm">Answered prayers</div>
-          </div>
-          <div className="text-center">
+            <div className="text-indigo-100 text-sm">Lives impacted</div>
+          </FadeUp>
+          <FadeUp delayMs={140}>
             <div className="text-3xl font-extrabold">500+</div>
             <div className="text-indigo-100 text-sm">Devotions posted</div>
-          </div>
-          <div className="text-center">
+          </FadeUp>
+          <FadeUp delayMs={200}>
             <div className="text-3xl font-extrabold">40+</div>
             <div className="text-indigo-100 text-sm">Partner churches</div>
-          </div>
+          </FadeUp>
         </div>
       </section>
 
       {/* Upcoming service / Billboard */}
       <section className="py-12 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
-          <div className="p-6 rounded-xl bg-white border">
+          <FadeUp className="p-6 rounded-xl bg-white border">
             <div className="flex items-center gap-3 mb-3">
               {isLive ? (
                 <PlayCircle className="h-6 w-6 text-red-500" />
@@ -157,14 +187,25 @@ export default function HomePage() {
                     <div className="sm:col-span-1">
                       {toYouTubeEmbed(moment?.videoUrl) ? (
                         <div className="bg-black relative w-full h-full min-h-[180px]">
-                          <iframe
-                            className="absolute inset-0 w-full h-full"
-                            src={`${toYouTubeEmbed(moment?.videoUrl)}?rel=0&modestbranding=1&controls=1`}
-                            title={moment?.title || 'Service Moment'}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                          />
+                          {moment?.autoplay || momentPlaying ? (
+                            <iframe
+                              className="absolute inset-0 w-full h-full"
+                              src={`${toYouTubeEmbed(moment?.videoUrl)}?rel=0&modestbranding=1&controls=1&autoplay=${moment?.autoplay || momentPlaying ? '1' : '0'}&mute=${moment?.muted !== false ? '1' : '0'}${moment?.loop ? `&loop=1&playlist=${getYouTubeId(moment?.videoUrl) || ''}` : ''}`}
+                              title={moment?.title || 'Service Moment'}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <button onClick={() => setMomentPlaying(true)} className="absolute inset-0 w-full h-full group">
+                              <img src={moment?.image || '/images/hero/home_hero_2.JPG'} alt={moment?.title || 'Service Moment'} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition" />
+                              <span className="absolute inset-0 flex items-center justify-center">
+                                <span className="h-14 w-14 rounded-full bg-white/90 flex items-center justify-center shadow">
+                                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 text-indigo-600"><path d="M8 5v14l11-7z"/></svg>
+                                </span>
+                              </span>
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <img src={moment?.image || '/images/hero/home_hero_2.JPG'} alt={moment?.title || 'Service Moment'} className="w-full h-full object-cover" />
@@ -186,8 +227,8 @@ export default function HomePage() {
                 </Link>
               )}
             </div>
-          </div>
-          <div className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-white border">
+          </FadeUp>
+          <FadeUp className="p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-white border" delayMs={100}>
             <h3 className="text-xl font-semibold mb-2">What to expect</h3>
             <ul className="space-y-2 text-gray-700 list-disc list-inside">
               <li>Uplifting worship and teaching</li>
@@ -195,14 +236,14 @@ export default function HomePage() {
               <li>Private prayer with ministers</li>
               <li>Moments and notes for later reflection</li>
             </ul>
-          </div>
+          </FadeUp>
         </div>
       </section>
 
       {/* Ministries / Features grid */}
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6">Our Ministries</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Our Ministries</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="p-6 rounded-lg border bg-gray-50">
               <div className="flex items-center gap-3 mb-2"><Church className="h-5 w-5 text-indigo-600" /><h3 className="font-semibold">Worship Services</h3></div>
@@ -235,10 +276,12 @@ export default function HomePage() {
       {/* Stories of Impact */}
       <section className="py-12 bg-indigo-50">
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6">Stories of Impact</h2>
+          <FadeUp>
+            <h2 className="text-2xl font-bold mb-6 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Stories of Impact</h2>
+          </FadeUp>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {stories.map((t: any, i: number) => (
-              <figure key={i} className="rounded-xl overflow-hidden bg-white border shadow-sm flex flex-col">
+              <FadeUp key={i} className="rounded-xl overflow-hidden bg-white border shadow-sm flex flex-col">
                 <img
                   src={t.src}
                   alt={t.name}
@@ -249,40 +292,30 @@ export default function HomePage() {
                   <p className="text-gray-700 text-sm">“{t.quote}”</p>
                   <div className="mt-3 text-xs text-gray-500">— {t.name}</div>
                 </figcaption>
-              </figure>
+              </FadeUp>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Newsletter signup */}
-      <section className="py-14 bg-white">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-2">Stay in the loop</h2>
-          <p className="text-gray-600 mb-6">Get updates on upcoming services, events, and devotionals.</p>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const form = e.currentTarget as HTMLFormElement;
-              const email = (form.elements.namedItem('email') as HTMLInputElement)?.value;
-              try {
-                const res = await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-                const j = await res.json().catch(() => ({}));
-                if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to subscribe');
-                toast.success('Subscribed successfully');
-                form.reset();
-              } catch (err: any) {
-                toast.error(err?.message || 'Subscription failed');
-              }
-            }}
-            className="flex flex-col sm:flex-row gap-3 justify-center"
-          >
-            <input name="email" type="email" required placeholder="you@example.com" className="w-full sm:w-80 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600" />
-            <button className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-5 py-2.5 text-white font-medium hover:bg-indigo-500">Subscribe</button>
-          </form>
-          <p className="text-xs text-gray-500 mt-2">We respect your privacy. Unsubscribe anytime.</p>
+      {/* Past Highlights on Home */}
+      <section className="py-12 bg-gradient-to-b from-[var(--brand-100,#eef2ff)] to-[var(--brand-200,#dbe3ff)]">
+        <div className="max-w-6xl mx-auto px-4">
+          <FadeUp>
+            <h2 className="text-2xl font-bold mb-3 text-center underline decoration-indigo-600 underline-offset-8 decoration-2">Past Highlights</h2>
+            <p className="text-gray-700 mb-6 text-center">Moments from recent gatherings and outreach.</p>
+          </FadeUp>
+          <div className="rounded-xl overflow-hidden border">
+            <HeroSlider
+              slides={(highlights || []).map((h) => ({ src: h.src, title: h.title, subtitle: h.subtitle }))}
+              autoAdvanceMs={2000}
+              heightClass="h-[260px] md:h-[360px]"
+            />
+          </div>
         </div>
       </section>
+
+      {/* Newsletter section removed per request */}
     </MainLayout>
   );
 }

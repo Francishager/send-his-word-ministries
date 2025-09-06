@@ -7,6 +7,7 @@ import ChatPanel from '@/components/live/ChatPanel';
 import PrayerQueue from '@/components/prayer/PrayerQueue';
 import { useAuth } from '@/contexts/AuthContext';
 import { Share2, ThumbsUp, Heart } from 'lucide-react';
+import FadeUp from '@/components/ux/FadeUp';
 
 const slides: HeroSlide[] = [
   {
@@ -65,7 +66,7 @@ export default function LivePage() {
           <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-red-700">{error}</div>
         )}
         {!isLive ? (
-          <div className="text-center">
+          <FadeUp className="text-center">
             <h2 className="text-2xl font-semibold mb-1">Next service{service?.title ? `: ${service.title}` : ''}</h2>
             {startDate && (
               <p className="text-gray-600">Starts at {startDate.toLocaleString()}</p>
@@ -87,20 +88,20 @@ export default function LivePage() {
               </div>
             </div>
             <p className="mt-4 text-gray-600">This page will automatically switch to the livestream when we go live.</p>
-          </div>
+          </FadeUp>
         ) : (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Player + details */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-black rounded-xl overflow-hidden aspect-video">
+              <FadeUp className="bg-black rounded-xl overflow-hidden aspect-video">
                 {canRenderPlayer ? (
                   <LivePlayer provider={provider} sourceIdOrUrl={source} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white">Live Player</div>
                 )}
-              </div>
+              </FadeUp>
               {/* Service details / actions */}
-              <div className="bg-white rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <FadeUp className="bg-white rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <div className="text-sm text-gray-500">Now Streaming</div>
                   <h3 className="text-xl font-semibold">{service?.title || 'Live Service'}</h3>
@@ -117,12 +118,12 @@ export default function LivePage() {
                     <Share2 className="h-4 w-4" /> Share
                   </a>
                 </div>
-              </div>
+              </FadeUp>
             </div>
 
             {/* Right panel with tabs */}
             <aside className="space-y-4">
-              <div className="bg-white rounded-xl border">
+              <FadeUp className="bg-white rounded-xl border">
                 <div className="flex border-b">
                   <TabButton active>Chat</TabButton>
                   <TabButton>Prayer</TabButton>
@@ -130,14 +131,14 @@ export default function LivePage() {
                 <div className="p-4">
                   <TabbedPanels serviceId={service?.id} isAuthenticated={isAuthenticated} />
                 </div>
-              </div>
+              </FadeUp>
               {/* Optional: viewers info */}
-              <div className="bg-white rounded-xl border p-4 text-sm text-gray-600">
+              <FadeUp className="bg-white rounded-xl border p-4 text-sm text-gray-600">
                 <div className="flex items-center justify-between">
                   <div>Viewers</div>
                   <div className="font-semibold">~ {Math.floor(Math.random()*200)+50}</div>
                 </div>
-              </div>
+              </FadeUp>
             </aside>
           </div>
         )}

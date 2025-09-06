@@ -1,7 +1,9 @@
 import { getSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Default to same-origin proxy path to avoid CORS/mixed-content during dev.
+// Configure proxy via next.config.js rewrites.
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/backend';
 
 interface RequestOptions extends RequestInit {
   /** Whether to include authentication token */

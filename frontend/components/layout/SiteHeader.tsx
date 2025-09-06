@@ -9,6 +9,7 @@ export default function SiteHeader() {
     { name: 'About', href: '/about' },
     { name: 'Live', href: '/live' },
     { name: 'Blog', href: '/blog' },
+    { name: 'Categories', href: { pathname: '/blog', query: {} } },
     { name: 'Contact', href: '/contact' },
   ];
 

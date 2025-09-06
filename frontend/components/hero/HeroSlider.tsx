@@ -84,7 +84,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
 
       {/* Content overlay */}
-      <div className="relative z-10 max-w-6xl mx-auto h-full px-4 flex flex-col justify-center text-white">
+      <div className="relative z-10 max-w-6xl mx-auto h-full px-4 flex flex-col justify-end md:justify-center pb-6 md:pb-0 text-white">
         {current.title && <h1 className="text-3xl md:text-5xl font-extrabold mb-3">{current.title}</h1>}
         {current.subtitle && <p className="text-base md:text-lg text-gray-200 max-w-2xl mb-6">{current.subtitle}</p>}
         {current.ctaText && current.ctaHref && (

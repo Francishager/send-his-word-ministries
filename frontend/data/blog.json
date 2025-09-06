@@ -1,0 +1,30 @@
+[
+  {
+    "id": "welcome-1",
+    "slug": "welcome-to-send-his-word",
+    "title": "Welcome to Send His Word",
+    "excerpt": "A quick introduction to our mission, livestream, and community.",
+    "contentHtml": "<p>Welcome! We’re honored you’re here. Explore our livestream, request prayer, and connect with groups as we grow in Christ together.</p>",
+    "coverImage": "/images/hero/home_hero_1.JPG",
+    "categoryId": "devotionals",
+    "author": "SHWM Team",
+    "date": "2025-09-05T17:00:00.000Z",
+    "tags": ["welcome", "community"],
+    "isFeatured": true,
+    "isNews": false
+  },
+  {
+    "id": "news-aug-update",
+    "slug": "august-ministry-update",
+    "title": "August Ministry Update",
+    "excerpt": "Highlights from August: worship night, outreach, and testimonies.",
+    "contentHtml": "<p>God moved powerfully in August! From worship nights to outreach, we witnessed lives touched and hearts encouraged.</p>",
+    "coverImage": "/images/hero/home_hero_3.JPG",
+    "categoryId": "news",
+    "author": "Pastoral Team",
+    "date": "2025-08-28T12:00:00.000Z",
+    "tags": ["news", "update"],
+    "isFeatured": false,
+    "isNews": true
+  }
+]

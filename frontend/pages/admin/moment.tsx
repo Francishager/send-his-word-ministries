@@ -13,6 +13,10 @@ interface MomentData {
   ctaText?: string;
   ctaHref?: string;
   image?: string;
+  videoUrl?: string;
+  autoplay?: boolean;
+  muted?: boolean;
+  loop?: boolean;
 }
 
 function AdminMoment() {
@@ -85,6 +89,24 @@ function AdminMoment() {
               <div>
                 <Label className="block mb-1">CTA Href</Label>
                 <Input value={form.ctaHref || ''} onChange={(e) => onChange({ ctaHref: e.target.value })} placeholder="/auth/login" />
+              </div>
+            </div>
+            <div>
+              <Label className="block mb-1">Video Url (YouTube / Shorts)</Label>
+              <Input value={form.videoUrl || ''} onChange={(e) => onChange({ videoUrl: e.target.value })} placeholder="https://www.youtube.com/shorts/XXXXX" />
+              <div className="mt-2 flex items-center gap-4 text-sm text-gray-700">
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" checked={!!form.autoplay} onChange={(e) => onChange({ autoplay: e.target.checked })} />
+                  Autoplay
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" checked={form.muted !== false} onChange={(e) => onChange({ muted: e.target.checked })} />
+                  Muted
+                </label>
+                <label className="inline-flex items-center gap-2">
+                  <input type="checkbox" checked={!!form.loop} onChange={(e) => onChange({ loop: e.target.checked })} />
+                  Loop
+                </label>
               </div>
             </div>
             <div>
