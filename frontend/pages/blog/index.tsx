@@ -37,22 +37,6 @@ function useBlog() {
       mounted = false;
     };
   }, []);
-
-  // Initialize category from URL (?category=...)
-  React.useEffect(() => {
-    const q = (router.query?.category as string) || '';
-    if (q && q !== categoryId) {
-      setCategoryId(q);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.query?.category]);
-
-  const updateCategory = (id: string) => {
-    setCategoryId(id);
-    const nextQuery: Record<string, any> = { ...router.query };
-    if (id) nextQuery.category = id; else delete nextQuery.category;
-    router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true });
-  };
   return { posts, loading };
 }
 
@@ -71,6 +55,21 @@ export default function BlogIndexPage() {
       .then((j) => setCategories(j?.categories || []))
       .catch(() => {});
   }, []);
+
+  // Initialize/sync category from URL (?category=...)
+  React.useEffect(() => {
+    const q = (router.query?.category as string) || '';
+    if (q && q !== categoryId) {
+      setCategoryId(q);
+    }
+  }, [router.query?.category, categoryId, setCategoryId, router.query]);
+
+  const updateCategory = (id: string) => {
+    setCategoryId(id);
+    const nextQuery: Record<string, any> = { ...router.query };
+    if (id) nextQuery.category = id; else delete nextQuery.category;
+    router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true });
+  };
 
   const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || []))).sort();
   const published = posts.filter((p) => (p as any).status !== 'pending');
