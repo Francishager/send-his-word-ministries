@@ -1,13 +1,15 @@
 import * as React from 'react';
+import CloudinaryUpload from '@/components/ux/CloudinaryUpload';
 
 interface WysiwygEditorProps {
   value: string;
   onChange: (html: string) => void;
   className?: string;
+  enableImageUpload?: boolean;
 }
 
 // Lightweight dependency-free WYSIWYG using contenteditable
-export default function WysiwygEditor({ value, onChange, className = '' }: WysiwygEditorProps) {
+export default function WysiwygEditor({ value, onChange, className = '', enableImageUpload = true }: WysiwygEditorProps) {
   const ref = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -29,6 +31,11 @@ export default function WysiwygEditor({ value, onChange, className = '' }: Wysiw
     if (ref.current) onChange(ref.current.innerHTML);
   };
 
+  const insertImageAtCaret = (url: string) => {
+    // Use execCommand for broad compatibility
+    exec('insertImage', url);
+  };
+
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2 mb-2">
@@ -40,6 +47,8 @@ export default function WysiwygEditor({ value, onChange, className = '' }: Wysiw
         <button type="button" onClick={() => exec('formatBlock', '<h3>')} className="px-2 py-1 border rounded text-sm">H3</button>
         <button type="button" onClick={() => exec('formatBlock', '<p>')} className="px-2 py-1 border rounded text-sm">P</button>
         <button type="button" onClick={() => exec('createLink', prompt('Enter URL') || '')} className="px-2 py-1 border rounded text-sm">Link</button>
+        <button type="button" onClick={() => insertImageAtCaret(prompt('Enter Image URL') || '')} className="px-2 py-1 border rounded text-sm">Image</button>
+        {enableImageUpload && <CloudinaryUpload onUploaded={insertImageAtCaret} buttonText="Upload & Insert" className="inline-block" />}
         <button type="button" onClick={() => exec('removeFormat')} className="px-2 py-1 border rounded text-sm">Clear</button>
       </div>
       <div

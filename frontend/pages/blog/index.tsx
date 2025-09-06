@@ -87,6 +87,7 @@ export default function BlogIndexPage() {
             {isAuthenticated && (
               <Link href="/blog/submit" className="rounded-md bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-500">Submit Post</Link>
             )}
+            <button onClick={() => document.getElementById('categories-sidebar')?.scrollIntoView({ behavior: 'smooth' })} className="lg:hidden rounded-md border px-3 py-2 text-sm">Categories</button>
           </div>
         </div>
       </section>
@@ -162,8 +163,8 @@ export default function BlogIndexPage() {
             ))}
           </div>
         </div>
-        <aside>
-          <div className="rounded-xl border bg-white p-4">
+        <aside id="categories-sidebar">
+          <div className="rounded-xl border bg-white p-4 sticky top-20">
             <h3 className="font-semibold mb-2">Categories</h3>
             <ul className="space-y-1 text-sm">
               <li>
