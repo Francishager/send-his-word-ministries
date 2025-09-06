@@ -89,14 +89,16 @@ export function withErrorBoundary<P>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>
 ): React.FC<P> {
-  // Do NOT type Wrapped as React.FC<P>; let TS infer the function type
-  const Wrapped = (props: P) => (
+  const Wrapped: React.FC<P> = (props) => (
     <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </ErrorBoundary>
   );
+  
 
-  Wrapped.displayName = `withErrorBoundary(${Component.displayName || Component.name || 'Component'})`;
+  // Format for display in DevTools
+  const name = Component.displayName || Component.name || 'Component';
+  Wrapped.displayName = `withErrorBoundary(${name})`;
 
   return Wrapped;
 }
