@@ -52,7 +52,8 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = authenticate(request, email=email, password=password)
+        # Django's ModelBackend expects 'username' kwarg which maps to USERNAME_FIELD ('email' on our User model)
+        user = authenticate(request, username=email, password=password)
         
         if user is None:
             return Response(
