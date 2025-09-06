@@ -5,6 +5,22 @@ import { toast } from 'react-hot-toast';
 // Configure proxy via next.config.js rewrites.
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '/backend';
 
+function resolveBaseUrl(): string {
+  // Absolute URL provided
+  if (/^https?:\/\//i.test(API_URL)) return API_URL.replace(/\/$/, '');
+  // Relative path provided: resolve against origin (browser) or env (SSR)
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+  return `${origin.replace(/\/$/, '')}${API_URL.startsWith('/') ? '' : '/'}${API_URL}`.replace(/\/$/, '');
+}
+
+function joinUrl(base: string, endpoint: string): string {
+  const b = base.replace(/\/$/, '');
+  const e = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  return `${b}/${e}`;
+}
+
 interface RequestOptions extends RequestInit {
   /** Whether to include authentication token */
   auth?: boolean;
@@ -131,8 +147,9 @@ export async function apiRequest<T = any>(
     ...fetchOptions
   } = options;
 
-  // Construct URL with query parameters
-  const url = new URL(`${API_URL}${endpoint}`);
+  // Construct URL with query parameters; ensure absolute base
+  const base = resolveBaseUrl();
+  const url = new URL(joinUrl(base, endpoint));
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {

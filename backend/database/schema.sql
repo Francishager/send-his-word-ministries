@@ -199,6 +199,31 @@ create trigger trg_bible_highlights_updated_at
 before update on bible_highlights
 for each row execute function set_updated_at();
 
+-- RLS for bible_highlights: user can CRUD their own highlights
+alter table if exists bible_highlights enable row level security;
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'bible_highlights' and policyname = 'bible_highlights_select_own'
+  ) then
+    create policy bible_highlights_select_own on bible_highlights for select using (auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'bible_highlights' and policyname = 'bible_highlights_insert_own'
+  ) then
+    create policy bible_highlights_insert_own on bible_highlights for insert with check (auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'bible_highlights' and policyname = 'bible_highlights_update_own'
+  ) then
+    create policy bible_highlights_update_own on bible_highlights for update using (auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'bible_highlights' and policyname = 'bible_highlights_delete_own'
+  ) then
+    create policy bible_highlights_delete_own on bible_highlights for delete using (auth.uid() = user_id);
+  end if;
+end $$;
+
 -- DEVOTIONS
 create table if not exists devotions (
   id uuid primary key default gen_random_uuid(),
@@ -445,6 +470,153 @@ create trigger trg_payment_webhooks_updated_at
 before update on payment_webhooks
 for each row execute function set_updated_at();
 
+-- BLOG_POSTS
+create table if not exists blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid references users(id) on delete set null,
+  slug text not null unique,
+  title text not null,
+  excerpt text,
+  content_html text not null,
+  cover_image text,
+  tags text[],
+  status text not null check (status in ('draft','pending_review','published','archived')) default 'published',
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_blog_posts_author on blog_posts(author_id);
+create index if not exists idx_blog_posts_status on blog_posts(status);
+create trigger trg_blog_posts_updated_at
+before update on blog_posts
+for each row execute function set_updated_at();
+
+-- BLOG_POSTS
+create table if not exists blog_posts (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid references users(id) on delete set null,
+  slug text not null unique,
+  title text not null,
+  excerpt text,
+  content_html text not null,
+  cover_image text,
+  tags text[],
+  status text not null check (status in ('draft','pending_review','published','archived')) default 'published',
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_blog_posts_author on blog_posts(author_id);
+create index if not exists idx_blog_posts_status on blog_posts(status);
+create trigger trg_blog_posts_updated_at
+before update on blog_posts
+for each row execute function set_updated_at();
+
+-- BLOG_COMMENTS
+create table if not exists blog_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references blog_posts(id) on delete cascade,
+  user_id uuid references users(id) on delete set null,
+  parent_id uuid references blog_comments(id) on delete cascade,
+  content text not null,
+  status text not null check (status in ('pending','approved','rejected','spam')) default 'pending',
+  likes_count int not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_blog_comments_post on blog_comments(post_id);
+create index if not exists idx_blog_comments_user on blog_comments(user_id);
+create index if not exists idx_blog_comments_parent on blog_comments(parent_id);
+create index if not exists idx_blog_comments_status on blog_comments(status);
+create trigger trg_blog_comments_updated_at
+before update on blog_comments
+for each row execute function set_updated_at();
+
+-- Enable RLS and basic policies for Supabase direct access
+alter table if exists blog_posts enable row level security;
+alter table if exists blog_comments enable row level security;
+alter table if exists testimonies enable row level security;
+
+-- Blog posts: public can read only published
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'blog_posts' and policyname = 'blog_posts_select_published'
+  ) then
+    create policy blog_posts_select_published on blog_posts for select using (status = 'published');
+  end if;
+end $$;
+
+-- Blog comments: public can read approved; authenticated can insert; users can update/delete their own.
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'blog_comments' and policyname = 'blog_comments_select_approved'
+  ) then
+    create policy blog_comments_select_approved on blog_comments for select using (status = 'approved');
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'blog_comments' and policyname = 'blog_comments_insert_auth'
+  ) then
+    create policy blog_comments_insert_auth on blog_comments for insert with check (auth.role() = 'authenticated');
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'blog_comments' and policyname = 'blog_comments_update_own'
+  ) then
+    create policy blog_comments_update_own on blog_comments for update using (auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'blog_comments' and policyname = 'blog_comments_delete_own'
+  ) then
+    create policy blog_comments_delete_own on blog_comments for delete using (auth.uid() = user_id);
+  end if;
+end $$;
+
+-- Testimonies: public read approved; authenticated can insert; users can update/delete their own
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'testimonies' and policyname = 'testimonies_select_approved_or_own'
+  ) then
+    create policy testimonies_select_approved_or_own on testimonies for select using (approved = true or auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'testimonies' and policyname = 'testimonies_insert_auth'
+  ) then
+    create policy testimonies_insert_auth on testimonies for insert with check (auth.role() = 'authenticated');
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'testimonies' and policyname = 'testimonies_update_own'
+  ) then
+    create policy testimonies_update_own on testimonies for update using (auth.uid() = user_id);
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'testimonies' and policyname = 'testimonies_delete_own'
+  ) then
+    create policy testimonies_delete_own on testimonies for delete using (auth.uid() = user_id);
+  end if;
+end $$;
+
+-- TESTIMONIES
+create table if not exists testimonies (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id) on delete set null,
+  name text,                                  -- snapshot of submitter's display name
+  title text not null,
+  content text not null,
+  user_image_url text,                        -- submitter profile/proof image
+  media_image_url text,                       -- optional testimony media image
+  media_video_url text,                       -- optional testimony media video
+  approved boolean not null default false,    -- moderation flag
+  priority int not null default 0,            -- for ordering in UI (lower first or custom)
+  published_at timestamptz,                   -- when approved/published
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_testimonies_user on testimonies(user_id);
+create index if not exists idx_testimonies_approved on testimonies(approved);
+create index if not exists idx_testimonies_priority on testimonies(priority);
+create trigger trg_testimonies_updated_at
+before update on testimonies
+for each row execute function set_updated_at();
+
 -- REPORTING VIEWS
 -- Weekly and monthly summaries for Giving
 create or replace view v_giving_summary_weekly as
@@ -512,3 +684,74 @@ begin
   refresh materialized view concurrently mv_donations_summary_weekly;
   refresh materialized view concurrently mv_donations_summary_monthly;
 end;$$;
+
+-- COUNTDOWNS (for live page timers)
+create table if not exists countdowns (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  target_time timestamptz not null,
+  active boolean not null default true,
+  service_id uuid references services(id) on delete set null,
+  created_by uuid references users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists idx_countdowns_active on countdowns(active);
+create index if not exists idx_countdowns_service on countdowns(service_id);
+create trigger trg_countdowns_updated_at
+before update on countdowns
+for each row execute function set_updated_at();
+
+alter table if exists countdowns enable row level security;
+
+-- Public can read only active countdowns
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'countdowns' and policyname = 'countdowns_select_active'
+  ) then
+    create policy countdowns_select_active on countdowns for select using (active = true);
+  end if;
+end $$;
+
+-- Authenticated users can insert/update (app UI will restrict by role)
+do $$ begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'countdowns' and policyname = 'countdowns_insert_auth'
+  ) then
+    create policy countdowns_insert_auth on countdowns for insert with check (auth.role() = 'authenticated');
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'countdowns' and policyname = 'countdowns_update_auth'
+  ) then
+    create policy countdowns_update_auth on countdowns for update using (auth.role() = 'authenticated');
+  end if;
+  if not exists (
+    select 1 from pg_policies where schemaname = 'public' and tablename = 'countdowns' and policyname = 'countdowns_delete_auth'
+  ) then
+    create policy countdowns_delete_auth on countdowns for delete using (auth.role() = 'authenticated');
+  end if;
+end $$;
+
+-- Public read for this bucket
+create policy "public read public-media"
+on storage.objects for select
+to public
+using (bucket_id = 'public-media');
+
+-- Authenticated users can upload (insert) into this bucket
+create policy "auth upload public-media"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'public-media');
+
+-- Optional: authenticated users may update their objects
+create policy "auth update public-media"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'public-media');
+
+-- Optional: authenticated users may delete their objects
+create policy "auth delete public-media"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'public-media');

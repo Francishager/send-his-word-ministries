@@ -5,6 +5,7 @@ import { UserRole } from '@/types/user';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import FadeUp from '@/components/ux/FadeUp';
+import { supabase } from '@/lib/supabaseClient';
 
 interface TestimonyItem {
   id: string;
@@ -28,9 +29,15 @@ function AdminTestimoniesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const r = await fetch('/api/testimonies');
-      const j = await r.json();
-      setItems(j?.testimonies || []);
+      const { data, error } = await supabase
+        .from('testimonies')
+        .select('*')
+        .order('priority', { ascending: true })
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setItems((data || []) as any);
+    } catch (e) {
+      // noop
     } finally {
       setLoading(false);
     }
@@ -67,10 +74,13 @@ function AdminTestimoniesPage() {
   const save = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/testimonies', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items) });
-      const j = await res.json().catch(() => ({}));
-      if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to save');
+      // Recompute priority based on current order
+      const withPriority = items.map((t, i) => ({ ...t, priority: i }));
+      // Batch upsert
+      const { error } = await supabase.from('testimonies').upsert(withPriority, { onConflict: 'id' });
+      if (error) throw error;
       alert('Saved changes');
+      setItems(withPriority);
     } catch (e: any) {
       alert(e?.message || 'Save failed');
     } finally {
