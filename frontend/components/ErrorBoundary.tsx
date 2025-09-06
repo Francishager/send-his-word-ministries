@@ -94,6 +94,7 @@ export function withErrorBoundary<P>(
       <Component {...props} />
     </ErrorBoundary>
   );
+  
 
   // Format for display in DevTools
   const name = Component.displayName || Component.name || 'Component';
