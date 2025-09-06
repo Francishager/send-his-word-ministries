@@ -27,7 +27,7 @@ declare module 'next-auth/jwt' {
 
 async function refreshAccessToken(token: JWT) {
   try {
-    const response = await fetch(`${API_URL}/auth/refresh`, {
+    const response = await fetch(`${API_URL}/users/auth/token/refresh/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${API_URL}/auth/login/`, {
+          const res = await fetch(`${API_URL}/users/auth/login/`, {
             method: 'POST',
             body: JSON.stringify({
               email: credentials?.email,
@@ -81,11 +81,14 @@ export const authOptions: NextAuthOptions = {
           const user = await res.json();
 
           if (res.ok && user) {
+            // Normalize shape from backend { user, access, refresh }
+            const core = (user && user.user) ? user.user : user;
             return {
-              ...user,
-              accessToken: user.access,
-              refreshToken: user.refresh,
-            };
+              ...core,
+              accessToken: user.access || core.accessToken,
+              refreshToken: user.refresh || core.refreshToken,
+              expiresIn: user.expires_in || core.expiresIn || 3600,
+            } as any;
           }
 
           // Return null if user data could not be retrieved
@@ -105,13 +108,15 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
+        const u: any = user as any;
+        const core = (u && u.user) ? u.user : u;
         return {
           ...token,
-          user: user.user,
-          accessToken: user.accessToken,
-          refreshToken: user.refreshToken,
-          accessTokenExpires: Date.now() + (user.expiresIn || 3600) * 1000,
-        };
+          user: core,
+          accessToken: u.accessToken ?? u.access ?? token.accessToken,
+          refreshToken: u.refreshToken ?? u.refresh ?? token.refreshToken,
+          accessTokenExpires: Date.now() + ((u.expiresIn ?? 3600) * 1000),
+        } as any;
       }
 
       // Return previous token if the access token has not expired
