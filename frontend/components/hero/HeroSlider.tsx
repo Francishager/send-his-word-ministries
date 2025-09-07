@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 export interface HeroSlide {
   src: string;
@@ -49,9 +49,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   React.useEffect(() => {
     if (!slides.length) return;
     const nextIndex = (index + 1) % slides.length;
-    const img = new Image();
-    img.src = slides[nextIndex].src;
-    nextImgRef.current = img as any;
+    if (typeof window !== 'undefined') {
+      const img = new window.Image();
+      img.src = slides[nextIndex].src;
+      nextImgRef.current = img as any;
+    }
   }, [index, slides]);
 
   if (!slides.length) return null;
@@ -65,7 +67,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
       {/* Stacked images for seamless crossfade + slide */}
       {/* Current image */}
       <div className="absolute inset-0">
-        <Image
+        <NextImage
           src={current.src}
           alt={current.alt || current.title || 'Hero'}
           fill
@@ -78,7 +80,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
       </div>
       {/* Next image */}
       <div className="absolute inset-0" aria-hidden>
-        <Image
+        <NextImage
           src={next.src}
           alt={next.alt || next.title || 'Hero next'}
           fill
