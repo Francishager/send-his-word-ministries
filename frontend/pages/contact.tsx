@@ -105,7 +105,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone (optional)</Label>
-                  <Input id="phone" placeholder="+1 555 555 555" {...register('phone')} />
+                  <Input id="phone" placeholder="+256 700 555 555" {...register('phone')} />
                 </div>
               </div>
               <div>
@@ -158,7 +158,7 @@ export default function ContactPage() {
               <strong>Email:</strong> info@sendhisword.org
             </p>
             <p>
-              <strong>Phone:</strong> +1 (555) 123-4567
+              <strong>Phone:</strong> +256 (0) 700 555 555
             </p>
             <p>
               <strong>Address:</strong> 123 Hope Street, Kampala, UG

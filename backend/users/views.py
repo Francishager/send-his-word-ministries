@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.cache import cache
+from core.services.validators import is_valid_email
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
@@ -43,6 +45,14 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        # Simple IP-based rate limit: 20 requests per 60 seconds
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR') or 'unknown'
+        key = f"login_rate:{ip}"
+        count = cache.get(key, 0)
+        if count and int(count) >= 20:
+            return Response({'error': 'Too many attempts. Please try again shortly.'}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        cache.set(key, int(count) + 1, timeout=60)
+
         email = request.data.get('email')
         password = request.data.get('password')
         
@@ -52,6 +62,10 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Validate email format early to avoid unnecessary auth hits
+        if not is_valid_email(email):
+            return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Django's ModelBackend expects 'username' kwarg which maps to USERNAME_FIELD ('email' on our User model)
         user = authenticate(request, username=email, password=password)
         

@@ -43,6 +43,7 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(false);
   const pesapalEnabled = process.env.NEXT_PUBLIC_PESAPAL_ENABLED === 'true';
   const mpesaEnabled = process.env.NEXT_PUBLIC_MPESA_ENABLED === 'true';
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE || '';
 
   const [form, setForm] = React.useState({
     name: '',
@@ -53,6 +54,7 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
     frequency: 'ONE_TIME' as 'ONE_TIME' | 'MONTHLY',
     currency: 'usd',
   });
+  const [errors, setErrors] = React.useState<{ [k: string]: string | undefined }>({});
   const on = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
   const [method, setMethod] = React.useState<'card' | 'mobile'>('card');
   const [mode, setMode] = React.useState<'give' | 'donate'>('give');
@@ -60,6 +62,49 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
   const FX: Record<string, number> = { usd: 1, eur: 0.92, gbp: 0.78, ugx: 3800, kes: 128, tzs: 2600 };
   const SYMBOL: Record<string, string> = { usd: '$', eur: '€', gbp: '£', ugx: 'USh ', kes: 'KSh ', tzs: 'TSh ' };
   const placeholderFor = (currency: string) => `${SYMBOL[currency] || ''}100`;
+
+  // Simple validators
+  const validateEmail = (val: string) => /^(?:[A-Z0-9._%+-]+)@(?:[A-Z0-9.-]+)\.[A-Z]{2,}$/i.test(val);
+  const validateName = (val: string) => /[A-Za-z]/.test(val) && val.trim().length >= 2; // must contain letters and be >= 2 chars
+  const validateAmount = (val: string) => {
+    const n = Number(val);
+    return Number.isFinite(n) && n > 0;
+  };
+  const isHumanLike = (val: string) => {
+    if (!val) return true; // optional
+    const t = val.trim();
+    if (t.length < 6) return false;
+    if (!/[A-Za-z]/.test(t)) return false;
+    if (/https?:\/\//i.test(t)) return false;
+    if (/<\/?script/i.test(t)) return false;
+    // not all same char
+    if (/^(.)\1{5,}$/.test(t)) return false;
+    return true;
+  };
+  const validateAll = () => {
+    const e: { [k: string]: string | undefined } = {};
+    if (!validateName(form.name)) e.name = 'Please enter your real name (letters, 2+ chars).';
+    if (!validateEmail(form.email)) e.email = 'Enter a valid email address.';
+    if (!validateAmount(form.amount)) e.amount = 'Enter a valid amount greater than 0.';
+    if (!form.type) e.type = 'Please select a type.';
+    if (!isHumanLike(form.message)) e.message = 'Message looks invalid. Avoid links and add a few words.';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  async function retry<T>(fn: () => Promise<T>, attempts = 3, baseDelay = 300): Promise<T> {
+    let lastErr: any;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastErr = err;
+        const delay = baseDelay * Math.pow(2, i);
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+    throw lastErr;
+  }
 
   const prevCurrencyRef = React.useRef(form.currency);
   React.useEffect(() => {
@@ -204,17 +249,20 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="block mb-1">Name</Label>
-                    <Input value={form.name} onChange={(e) => on('name', e.target.value)} />
+                    <Input value={form.name} onChange={(e) => { on('name', e.target.value); if (errors.name) setErrors((p)=>({ ...p, name: undefined })); }} placeholder="Your full name" />
+                    {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
                   </div>
                   <div>
                     <Label className="block mb-1">Email</Label>
-                    <Input type="email" value={form.email} onChange={(e) => on('email', e.target.value)} />
+                    <Input type="email" value={form.email} onChange={(e) => { on('email', e.target.value); if (errors.email) setErrors((p)=>({ ...p, email: undefined })); }} placeholder="you@example.com" />
+                    {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="block mb-1">Amount ({form.currency.toUpperCase()})</Label>
-                    <Input value={form.amount} onChange={(e) => on('amount', e.target.value)} placeholder={placeholderFor(form.currency)} />
+                    <Label className="block mb-1">Amount</Label>
+                    <Input type="number" min="1" step="0.01" value={form.amount} onChange={(e) => { on('amount', e.target.value); if (errors.amount) setErrors((p)=>({ ...p, amount: undefined })); }} placeholder={placeholderFor(form.currency)} />
+                    {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount}</p>}
                   </div>
                   <div>
                     <Label className="block mb-1">Currency</Label>
@@ -245,6 +293,7 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                         <option value="MISSION">Mission</option>
                       </select>
                     )}
+                    {errors.type && <p className="text-xs text-red-600 mt-1">{errors.type}</p>}
                   </div>
                   <div>
                     <Label className="block mb-1">Frequency</Label>
@@ -256,7 +305,8 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                 </div>
                 <div>
                   <Label className="block mb-1">Message (optional)</Label>
-                  <textarea value={form.message} onChange={(e) => on('message', e.target.value)} rows={3} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+                  <textarea value={form.message} onChange={(e) => { on('message', e.target.value); if (errors.message) setErrors((p)=>({ ...p, message: undefined })); }} rows={3} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+                  {errors.message && <p className="text-xs text-red-600 mt-1">{errors.message}</p>}
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button
@@ -266,20 +316,84 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                         error('Please select a type.');
                         return;
                       }
-                      if (method === 'card') {
-                        await startStripe();
+                      // Inline validation first
+                      if (!validateAll()) {
+                        error('Please fix the highlighted fields.');
                         return;
                       }
-                      // mobile money: prefer M-Pesa if enabled, else fall back to Pesapal
-                      if (mpesaEnabled) {
-                        await startMpesa();
-                        return;
+                      try {
+                        setLoading(true);
+                        // Prepare a local record first
+                        const prep = await retry(async () => {
+                          const r = await fetch(`${apiBase}/core/payments/prepare`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              mode,
+                              amount: Number(form.amount),
+                              type: String(form.type).toLowerCase(),
+                              currency: form.currency,
+                              method: method === 'card' ? 'card' : 'mobile_money',
+                              name: form.name,
+                              email: form.email,
+                              message: form.message,
+                            }),
+                          });
+                          const jj = await r.json();
+                          if (!r.ok) throw new Error(jj?.error || 'Failed to prepare payment');
+                          return jj;
+                        }, 3, 400);
+
+                        const idKey = mode === 'give' ? 'giving_id' : 'donation_id';
+
+                        if (method === 'card') {
+                          // Stripe flow with metadata
+                          const res = await fetch('/api/payments/stripe/create-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              amount: Number(form.amount),
+                              currency: form.currency,
+                              mode: 'payment',
+                              metadata: { [idKey]: prep.id, type: form.type, frequency: form.frequency, flow_mode: mode },
+                            }),
+                          });
+                          const j = await res.json();
+                          if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to start payment');
+                          window.location.href = j.url;
+                          return;
+                        }
+                        // Mobile money
+                        if (mpesaEnabled) {
+                          const phone = prompt('Enter your M-Pesa phone number (e.g., 2547XXXXXXXX)');
+                          if (!phone) return;
+                          const res = await fetch('/api/payments/mpesa/stk-push', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount: Number(form.amount), currency: 'KES', phone, reference: form.type, metadata: { [idKey]: prep.id, flow_mode: mode } }),
+                          });
+                          const j = await res.json();
+                          if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to start M-Pesa');
+                          alert('M-Pesa prompt initiated. Please complete on your phone.');
+                          return;
+                        }
+                        if (pesapalEnabled) {
+                          const res = await fetch('/api/payments/pesapal/create-order', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ amount: Number(form.amount), currency: form.currency, description: form.type, reference: `${mode}-${prep.id}` }),
+                          });
+                          const j = await res.json();
+                          if (!res.ok || !j?.ok) throw new Error(j?.error || 'Failed to start Pesapal');
+                          if (j.redirectUrl) window.open(j.redirectUrl, '_blank');
+                          return;
+                        }
+                        error('Mobile money is not enabled. Please choose Card instead.');
+                      } catch (e: any) {
+                        error(e?.message || 'Could not start payment');
+                      } finally {
+                        setLoading(false);
                       }
-                      if (pesapalEnabled) {
-                        await startPesapal();
-                        return;
-                      }
-                      error('Mobile money is not enabled. Please choose Card instead.');
                     }}
                     disabled={loading}
                     className="bg-indigo-600 hover:bg-indigo-500"

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from core.services.validators import is_valid_name
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -116,6 +117,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password2'):
             raise serializers.ValidationError({"password": "Password fields didn't match."})
+        # Human-ish name checks
+        if not is_valid_name(attrs.get('first_name', '')):
+            raise serializers.ValidationError({"first_name": "Please provide your real first name (letters, 2+ chars)."})
+        if not is_valid_name(attrs.get('last_name', '')):
+            raise serializers.ValidationError({"last_name": "Please provide your real last name (letters, 2+ chars)."})
         return attrs
     
     def create(self, validated_data):

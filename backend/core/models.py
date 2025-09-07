@@ -197,6 +197,8 @@ class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     campaign = models.ForeignKey(DonationCampaign, on_delete=models.SET_NULL, null=True, db_column='campaign_id')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
+    # partner | project | mission
+    donation_type = models.CharField(max_length=20, default='partner')
     status = models.TextField(default='pending')
     donated_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
@@ -253,7 +255,7 @@ class Giving(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_column='user_id')
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, db_column='service_id')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    giving_type = models.CharField(max_length=20, default='offering')  # tithe/offering/seed/other
+    giving_type = models.CharField(max_length=20, default='offering')  # tithe/offering
     method = models.TextField(blank=True, null=True)
     reference = models.TextField(blank=True, null=True)
     status = models.TextField(default='pending')

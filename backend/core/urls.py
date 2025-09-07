@@ -6,6 +6,8 @@ from .views import (
     GivingSummaryWeeklyView, GivingSummaryMonthlyView,
     DonationsSummaryWeeklyView, DonationsSummaryMonthlyView,
     RefreshReportingMaterializedViews,
+    GivingByTypeReport, DonationsByTypeReport,
+    PaymentsPrepareView,
 )
 
 router = DefaultRouter()
@@ -20,6 +22,7 @@ urlpatterns = [
     path('payments/webhooks/stripe', StripeWebhookView.as_view(), name='stripe-webhook'),
     path('payments/webhooks/pesapal', PesapalWebhookView.as_view(), name='pesapal-webhook'),
     path('payments/webhooks/mobile-money', MobileMoneyWebhookView.as_view(), name='mobile-money-webhook'),
+    path('payments/prepare', PaymentsPrepareView.as_view(), name='payments-prepare'),
 
     # Reports
     path('reports/giving/weekly', GivingSummaryWeeklyView.as_view(), name='giving-weekly'),
@@ -27,4 +30,6 @@ urlpatterns = [
     path('reports/donations/weekly', DonationsSummaryWeeklyView.as_view(), name='donations-weekly'),
     path('reports/donations/monthly', DonationsSummaryMonthlyView.as_view(), name='donations-monthly'),
     path('reports/refresh', RefreshReportingMaterializedViews.as_view(), name='reports-refresh'),
+    path('reports/giving/by-type', GivingByTypeReport.as_view(), name='giving-by-type'),
+    path('reports/donations/by-type', DonationsByTypeReport.as_view(), name='donations-by-type'),
 ]

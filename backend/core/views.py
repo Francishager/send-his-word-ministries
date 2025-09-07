@@ -11,12 +11,15 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.cache import cache
 
 import stripe
 
 from .models import (
-    Service, DonationCampaign, Donation, Giving, Payment, PaymentWebhook
+    Service, DonationCampaign, Donation, Giving, Payment, PaymentWebhook,
+    EngagementLog, NewsletterSubscriber
 )
+from .services.validators import is_valid_email, is_valid_name, is_human_text
 from .serializers import (
     ServiceSerializer, DonationCampaignSerializer, DonationSerializer,
     GivingSerializer, PaymentSerializer
@@ -91,12 +94,63 @@ class DonationViewSet(RoleBasedAccessMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     perm_code = 'donations_manage'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            qs = qs.filter(status__in=[s.strip() for s in status_param.split(',') if s.strip()])
+        return qs
+
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def upsert_simple(self, request):
+        """Create a pending donation record for the current user (or specified if admin/min).
+
+        Body: { amount: number, donation_type: 'partner'|'project'|'mission', campaign_id?: uuid }
+        Returns: { id, status }
+        """
+        data = request.data or {}
+        amount = data.get('amount')
+        donation_type = (data.get('donation_type') or '').lower()
+        campaign_id = data.get('campaign_id')
+        if amount is None:
+            return Response({"error": "amount is required"}, status=400)
+        try:
+            amount = float(amount)
+        except Exception:
+            return Response({"error": "amount must be a number"}, status=400)
+        if amount <= 0:
+            return Response({"error": "amount must be > 0"}, status=400)
+        if donation_type not in {"partner", "project", "mission"}:
+            return Response({"error": "donation_type must be partner|project|mission"}, status=400)
+
+        # Create a new pending record
+        if IsAdminUser().has_permission(request, self) or self._has_write_access(request):
+            user = data.get('user') or request.user
+        else:
+            user = request.user
+
+        donation = Donation.objects.create(
+            user=user,
+            campaign_id=campaign_id,
+            amount=amount,
+            donation_type=donation_type,
+            status='pending',
+        )
+        return Response({"id": str(donation.id), "status": donation.status}, status=201)
+
 
 class GivingViewSet(RoleBasedAccessMixin, viewsets.ModelViewSet):
     queryset = Giving.objects.all().order_by('-created_at')
     serializer_class = GivingSerializer
     permission_classes = [IsAuthenticated]
     perm_code = 'giving_manage'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            qs = qs.filter(status__in=[s.strip() for s in status_param.split(',') if s.strip()])
+        return qs
 
     def perform_create(self, serializer):
         """Attendees can only create giving for themselves. Admin/authorized ministers may specify user.
@@ -120,6 +174,44 @@ class GivingViewSet(RoleBasedAccessMixin, viewsets.ModelViewSet):
                 raise PermissionDenied("You can only modify your own giving records.")
             # Ensure user remains self
             serializer.save(user=request.user)
+
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def upsert_simple(self, request):
+        """Create a pending giving record for the current user (or specified if admin/min).
+
+        Body: { amount: number, giving_type: 'tithe'|'offering', service_id?: uuid, method?: 'card'|'mobile_money' }
+        Returns: { id, status }
+        """
+        data = request.data or {}
+        amount = data.get('amount')
+        giving_type = (data.get('giving_type') or '').lower()
+        service_id = data.get('service_id')
+        method = data.get('method')
+        if amount is None:
+            return Response({"error": "amount is required"}, status=400)
+        try:
+            amount = float(amount)
+        except Exception:
+            return Response({"error": "amount must be a number"}, status=400)
+        if amount <= 0:
+            return Response({"error": "amount must be > 0"}, status=400)
+        if giving_type not in {"tithe", "offering"}:
+            return Response({"error": "giving_type must be tithe|offering"}, status=400)
+
+        if IsAdminUser().has_permission(request, self) or self._has_write_access(request):
+            user = data.get('user') or request.user
+        else:
+            user = request.user
+
+        giving = Giving.objects.create(
+            user=user,
+            service_id=service_id,
+            amount=amount,
+            giving_type=giving_type,
+            method=method,
+            status='pending',
+        )
+        return Response({"id": str(giving.id), "status": giving.status}, status=201)
 
 
 class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
@@ -381,6 +473,162 @@ class SQLViewBase(APIView):
         return Response(rows)
 
 
+class PaymentsPrepareView(APIView):
+    """Prepare a local record for a payment before redirecting to a provider.
+
+    Accepts either a Give payload or a Donation payload and creates a pending row
+    in the respective table, returning its id so payment metadata can reference it.
+
+    Body example (Give):
+      { "mode": "give", "amount": 100, "type": "offering", "currency": "USD", "method": "card", "service_id": null }
+
+    Body example (Donate):
+      { "mode": "donate", "amount": 50, "type": "project", "currency": "USD", "campaign_id": null }
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data or {}
+        # Simple IP-based rate limit: 15 requests per 60 seconds
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR') or 'unknown'
+        key = f"prep_rate:{ip}"
+        count = cache.get(key, 0)
+        if count and int(count) >= 15:
+            return Response({"error": "Too many requests, please try again shortly."}, status=429)
+        cache.set(key, int(count) + 1, timeout=60)
+
+        mode = (data.get('mode') or '').lower()
+        amount = data.get('amount')
+        currency = (data.get('currency') or 'USD').upper()
+        method = (data.get('method') or '').lower()  # card|mobile_money
+        type_val = (data.get('type') or '').lower()
+        name = (data.get('name') or '').strip()
+        email = (data.get('email') or '').strip()
+        message = (data.get('message') or '').strip()
+        if amount is None:
+            return Response({"error": "amount is required"}, status=400)
+        try:
+            amount = float(amount)
+        except Exception:
+            return Response({"error": "amount must be a number"}, status=400)
+        if amount <= 0:
+            return Response({"error": "amount must be > 0"}, status=400)
+
+        # Human validation
+        if not is_valid_name(name):
+            return Response({"error": "Please provide your real name."}, status=400)
+        if not is_valid_email(email):
+            return Response({"error": "Please provide a valid email address."}, status=400)
+        if not is_human_text(message, optional=True):
+            return Response({"error": "Message appears invalid. Avoid links/scripts and add a few words."}, status=400)
+
+        # Allow anonymous create; if authenticated, attach to user
+        user = request.user if request.user and request.user.is_authenticated else None
+
+        if mode == 'give':
+            if type_val not in {'tithe', 'offering'}:
+                return Response({"error": "type must be tithe|offering for give"}, status=400)
+            service_id = data.get('service_id')
+            giving = Giving.objects.create(
+                user=user,
+                service_id=service_id,
+                amount=amount,
+                giving_type=type_val,
+                method=method or None,
+                status='pending',
+            )
+            return Response({
+                "kind": "giving",
+                "id": str(giving.id),
+                "currency": currency,
+                "amount": amount,
+            }, status=201)
+
+        if mode == 'donate':
+            if type_val not in {'partner', 'project', 'mission'}:
+                return Response({"error": "type must be partner|project|mission for donate"}, status=400)
+            campaign_id = data.get('campaign_id')
+            donation = Donation.objects.create(
+                user=user,
+                campaign_id=campaign_id,
+                amount=amount,
+                donation_type=type_val,
+                status='pending',
+            )
+            return Response({
+                "kind": "donation",
+                "id": str(donation.id),
+                "currency": currency,
+                "amount": amount,
+            }, status=201)
+
+        return Response({"error": "mode must be 'give' or 'donate'"}, status=400)
+
+
+class ContactSubmitView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data or {}
+        # Rate limit: 10 per minute per IP
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR') or 'unknown'
+        key = f"contact_rate:{ip}"
+        count = cache.get(key, 0)
+        if count and int(count) >= 10:
+            return Response({"error": "Too many requests. Please try again shortly."}, status=429)
+        cache.set(key, int(count) + 1, timeout=60)
+
+        name = (data.get('name') or '').strip()
+        email = (data.get('email') or '').strip()
+        message = (data.get('message') or '').strip()
+
+        if not is_valid_name(name):
+            return Response({"error": "Please provide your real name."}, status=400)
+        if not is_valid_email(email):
+            return Response({"error": "Please provide a valid email address."}, status=400)
+        if not is_human_text(message, optional=False):
+            return Response({"error": "Message appears invalid. Avoid links/scripts and add a few words."}, status=400)
+
+        EngagementLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            event_type='contact_submit',
+            event_data={"name": name, "email": email, "message": message, "ip": ip},
+        )
+        return Response({"ok": True})
+
+
+class NewsletterSubscribeView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data or {}
+        # Rate limit: 10 per minute per IP
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR') or 'unknown'
+        key = f"nl_rate:{ip}"
+        count = cache.get(key, 0)
+        if count and int(count) >= 10:
+            return Response({"error": "Too many requests. Please try again shortly."}, status=429)
+        cache.set(key, int(count) + 1, timeout=60)
+
+        email = (data.get('email') or '').strip()
+        if not is_valid_email(email):
+            return Response({"error": "Please provide a valid email address."}, status=400)
+
+        # Upsert subscriber
+        sub, _ = NewsletterSubscriber.objects.get_or_create(email=email)
+        sub.status = 'subscribed'
+        if request.user.is_authenticated:
+            sub.user = request.user
+        sub.save()
+        EngagementLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            event_type='newsletter_subscribe',
+            event_data={"email": email, "ip": ip},
+        )
+        return Response({"ok": True})
+
+
 class GivingSummaryWeeklyView(SQLViewBase):
     view_name = 'v_giving_summary_weekly'
 
@@ -404,3 +652,70 @@ class RefreshReportingMaterializedViews(APIView):
         with connection.cursor() as cursor:
             cursor.execute("SELECT refresh_reporting_materialized_views();")
         return Response({"refreshed": True})
+
+
+class GivingByTypeReport(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Optional filters: from, to (ISO); status default succeeded+pending
+        dt_from = request.GET.get('from')
+        dt_to = request.GET.get('to')
+        status_filter = request.GET.get('status')  # comma-separated
+        statuses = [s.strip() for s in (status_filter.split(',') if status_filter else ['succeeded','pending'])]
+        params = []
+        where = ["giving_type in ('tithe','offering')"]
+        if dt_from:
+            where.append("created_at >= %s")
+            params.append(dt_from)
+        if dt_to:
+            where.append("created_at <= %s")
+            params.append(dt_to)
+        if statuses:
+            where.append("status = ANY(%s)")
+            params.append(statuses)
+        sql = f"""
+            select giving_type, status, count(*) as tx_count, sum(amount) as total_amount
+            from giving
+            where {' and '.join(where)}
+            group by giving_type, status
+            order by giving_type, status
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            cols = [c[0] for c in cursor.description]
+            rows = [dict(zip(cols, r)) for r in cursor.fetchall()]
+        return Response(rows)
+
+
+class DonationsByTypeReport(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        dt_from = request.GET.get('from')
+        dt_to = request.GET.get('to')
+        status_filter = request.GET.get('status')
+        statuses = [s.strip() for s in (status_filter.split(',') if status_filter else ['succeeded','pending'])]
+        params = []
+        where = ["donation_type in ('partner','project','mission')"]
+        if dt_from:
+            where.append("created_at >= %s")
+            params.append(dt_from)
+        if dt_to:
+            where.append("created_at <= %s")
+            params.append(dt_to)
+        if statuses:
+            where.append("status = ANY(%s)")
+            params.append(statuses)
+        sql = f"""
+            select donation_type, status, count(*) as tx_count, sum(amount) as total_amount
+            from donations
+            where {' and '.join(where)}
+            group by donation_type, status
+            order by donation_type, status
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            cols = [c[0] for c in cursor.description]
+            rows = [dict(zip(cols, r)) for r in cursor.fetchall()]
+        return Response(rows)
