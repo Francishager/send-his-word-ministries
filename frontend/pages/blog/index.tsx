@@ -2,6 +2,8 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import FadeUp from '@/components/ux/FadeUp';
 import Link from 'next/link';
+import Image from 'next/image';
+import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -43,18 +45,22 @@ function useBlog() {
 export default function BlogIndexPage() {
   const { posts } = useBlog();
   const [query, setQuery] = React.useState('');
+  const [debouncedQuery, setDebouncedQuery] = React.useState('');
   const [tag, setTag] = React.useState<string>('');
   const [categoryId, setCategoryId] = React.useState<string>('');
   const [categories, setCategories] = React.useState<{ id: string; name: string }[]>([]);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  // SWR categories cache
+  const fetcher = (url: string) => fetch(url).then((r) => r.json());
+  const { data: catData } = useSWR('/api/categories', fetcher);
+
   React.useEffect(() => {
-    fetch('/api/categories')
-      .then((r) => r.json())
-      .then((j) => setCategories(j?.categories || []))
-      .catch(() => {});
-  }, []);
+    if (catData && Array.isArray(catData.categories)) {
+      setCategories(catData.categories);
+    }
+  }, [catData]);
 
   // Initialize/sync category from URL (?category=...)
   React.useEffect(() => {
@@ -64,6 +70,12 @@ export default function BlogIndexPage() {
     }
   }, [router.query?.category, categoryId, setCategoryId, router.query]);
 
+  // Debounce search input
+  React.useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query), 250);
+    return () => clearTimeout(id);
+  }, [query]);
+
   const updateCategory = (id: string) => {
     setCategoryId(id);
     const nextQuery: Record<string, any> = { ...router.query };
@@ -71,21 +83,26 @@ export default function BlogIndexPage() {
     router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true });
   };
 
-  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags || []))).sort();
-  const published = posts.filter((p) => (p as any).status !== 'pending');
-  const featured = published.find((p) => p.isFeatured);
-  const news = published.filter((p) => p.isNews);
-  const filtered = published.filter((p) => {
-    const q = query.trim().toLowerCase();
-    const okQ =
-      !q ||
-      p.title.toLowerCase().includes(q) ||
-      p.excerpt.toLowerCase().includes(q) ||
-      (p.tags || []).some((t) => t.toLowerCase().includes(q));
-    const okT = !tag || (p.tags || []).includes(tag);
-    const okC = !categoryId || (p as any).categoryId === categoryId;
-    return okQ && okT && okC;
-  });
+  const allTags = React.useMemo(
+    () => Array.from(new Set(posts.flatMap((p) => p.tags || []))).sort(),
+    [posts]
+  );
+  const published = React.useMemo(() => posts.filter((p) => (p as any).status !== 'pending'), [posts]);
+  const featured = React.useMemo(() => published.find((p) => p.isFeatured), [published]);
+  const news = React.useMemo(() => published.filter((p) => p.isNews), [published]);
+  const filtered = React.useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase();
+    return published.filter((p) => {
+      const okQ =
+        !q ||
+        p.title.toLowerCase().includes(q) ||
+        p.excerpt.toLowerCase().includes(q) ||
+        (p.tags || []).some((t) => t.toLowerCase().includes(q));
+      const okT = !tag || (p.tags || []).includes(tag);
+      const okC = !categoryId || (p as any).categoryId === categoryId;
+      return okQ && okT && okC;
+    });
+  }, [published, debouncedQuery, tag, categoryId]);
 
   return (
     <MainLayout
@@ -93,11 +110,14 @@ export default function BlogIndexPage() {
       description="News, devotionals, and updates from Send His Word Ministries"
     >
       <section className="relative">
-        <div className="relative">
-          <img
+        <div className="relative h-[320px]">
+          <Image
             src={featured?.coverImage || '/images/hero/home_hero_3.JPG'}
             alt="Blog"
-            className="w-full h-[320px] object-cover"
+            fill
+            sizes="100vw"
+            priority
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-black/40" />
           <div className="absolute inset-0 flex items-end md:items-center">
@@ -169,11 +189,13 @@ export default function BlogIndexPage() {
               className="block rounded-2xl overflow-hidden border bg-white"
             >
               <div className="grid md:grid-cols-2">
-                <div className="h-64 md:h-full">
-                  <img
+                <div className="h-64 md:h-full relative">
+                  <Image
                     src={featured.coverImage || '/images/hero/home_hero_4.JPG'}
                     alt={featured.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
                   />
                 </div>
                 <div className="p-6">
@@ -209,11 +231,15 @@ export default function BlogIndexPage() {
               <FadeUp key={p.id}>
                 <article className="rounded-xl overflow-hidden border bg-white flex flex-col">
                   <Link href={`/blog/${p.slug}`}>
-                    <img
-                      src={p.coverImage || '/images/hero/home_hero_2.JPG'}
-                      alt={p.title}
-                      className="w-full h-44 object-cover"
-                    />
+                    <div className="relative h-44">
+                      <Image
+                        src={p.coverImage || '/images/hero/home_hero_2.JPG'}
+                        alt={p.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
+                      />
+                    </div>
                   </Link>
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="text-xs text-gray-500">
@@ -266,11 +292,15 @@ export default function BlogIndexPage() {
               <FadeUp key={p.id}>
                 <article className="rounded-xl overflow-hidden border bg-white flex flex-col">
                   <Link href={`/blog/${p.slug}`}>
-                    <img
-                      src={p.coverImage || '/images/hero/home_hero_5.JPG'}
-                      alt={p.title}
-                      className="w-full h-44 object-cover"
-                    />
+                    <div className="relative h-44">
+                      <Image
+                        src={p.coverImage || '/images/hero/home_hero_5.JPG'}
+                        alt={p.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover"
+                      />
+                    </div>
                   </Link>
                   <div className="p-4 flex-1 flex flex-col">
                     <div className="text-xs text-gray-500">

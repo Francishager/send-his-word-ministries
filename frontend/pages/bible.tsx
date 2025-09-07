@@ -12,6 +12,9 @@ const BOOKS = [
 
 interface Verse { verse: number; text: string; }
 
+// In-memory session cache for fast back/forward within a session
+const memCache = new Map<string, Verse[]>();
+
 export default function BiblePage() {
   const { isAuthenticated, user } = useAuth();
   const [book, setBook] = React.useState('John');
@@ -21,6 +24,34 @@ export default function BiblePage() {
   const [highlights, setHighlights] = React.useState<number[]>([]); // verse numbers highlighted for current chapter
   const [translation, setTranslation] = React.useState<'kjv'|'web'|'asv'>('kjv');
   const [hoverVerse, setHoverVerse] = React.useState<number | null>(null);
+
+  const chapterKey = React.useMemo(() => `${translation}:${book}:${chapter}`, [translation, book, chapter]);
+
+  const fetchChapter = async (b: string, c: number, t: 'kjv'|'web'|'asv'): Promise<Verse[] | null> => {
+    const key = `bible:${t}:${b}:${c}`;
+    // In-memory first
+    if (memCache.has(key)) return memCache.get(key)!;
+    // LocalStorage cache (with TTL enforcement handled by caller)
+    const cachedRaw = localStorage.getItem(key);
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && Array.isArray(cached.verses)) {
+          memCache.set(key, cached.verses);
+          return cached.verses as Verse[];
+        }
+      } catch {}
+    }
+    // Network fetch
+    const ref = encodeURIComponent(`${b} ${c}`);
+    const res = await fetch(`https://bible-api.com/${ref}?translation=${t}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const v: Verse[] = (data.verses || []).map((x: any) => ({ verse: x.verse, text: x.text }));
+    memCache.set(key, v);
+    localStorage.setItem(key, JSON.stringify({ verses: v, ts: Date.now() }));
+    return v;
+  };
 
   const loadChapter = async () => {
     setLoading(true);
@@ -41,25 +72,28 @@ export default function BiblePage() {
             } else {
               setHighlights([]);
             }
+            // Store in memory cache too
+            memCache.set(key, cached.verses as Verse[]);
             return;
           }
         }
       }
 
       // Free Bible API: https://bible-api.com/{ref}?translation=kjv|web|asv
-      const ref = encodeURIComponent(`${book} ${chapter}`);
-      const res = await fetch(`https://bible-api.com/${ref}?translation=${translation}`);
-      if (!res.ok) throw new Error('Failed to fetch chapter');
-      const data = await res.json();
-      const v: Verse[] = (data.verses || []).map((x: any) => ({ verse: x.verse, text: x.text }));
+      const v = await fetchChapter(book, chapter, translation);
+      if (!v) throw new Error('Failed to fetch chapter');
       setVerses(v);
-      // Save to cache
-      localStorage.setItem(key, JSON.stringify({ verses: v, ts: Date.now() }));
+      // Save to cache was done in fetchChapter
       if (isAuthenticated) {
         await loadHighlights();
       } else {
         setHighlights([]);
       }
+      // Prefetch next/previous chapters in background (best-effort)
+      setTimeout(() => {
+        fetchChapter(book, chapter + 1, translation).catch(() => {});
+        if (chapter > 1) fetchChapter(book, chapter - 1, translation).catch(() => {});
+      }, 0);
     } catch (e: any) {
       toast.error(e?.message || 'Failed to load chapter');
     } finally {
@@ -158,7 +192,13 @@ export default function BiblePage() {
 
           {/* Chapter content */}
           <div className="rounded-xl border bg-white">
-            {verses.length === 0 ? (
+            {loading ? (
+              <div className="p-4 animate-pulse">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="h-4 bg-gray-200 rounded mb-3" />
+                ))}
+              </div>
+            ) : verses.length === 0 ? (
               <div className="p-4 text-gray-600">No verses loaded.</div>
             ) : (
               <div className="divide-y">

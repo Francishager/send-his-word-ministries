@@ -2,7 +2,8 @@ import MainLayout from '@/components/layout/MainLayout';
 import HeroSlider, { HeroSlide } from '@/components/hero/HeroSlider';
 import React from 'react';
 import useNextService from '@/hooks/useNextService';
-import LivePlayer from '@/components/live/LivePlayer';
+import dynamic from 'next/dynamic';
+const LivePlayer = dynamic(() => import('@/components/live/LivePlayer'), { ssr: false });
 import ChatPanel from '@/components/live/ChatPanel';
 import PrayerQueue from '@/components/prayer/PrayerQueue';
 import { useAuth } from '@/contexts/AuthContext';
@@ -107,11 +108,11 @@ export default function LivePage() {
             {/* Player + details */}
             <div className="lg:col-span-2 space-y-4">
               <FadeUp className="bg-black rounded-xl overflow-hidden aspect-video">
-                {canRenderPlayer ? (
+                {isLive && canRenderPlayer ? (
                   <LivePlayer provider={provider} sourceIdOrUrl={source} />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white">
-                    Live Player
+                    {isLive ? 'Preparing live stream…' : 'We will go live soon'}
                   </div>
                 )}
               </FadeUp>
