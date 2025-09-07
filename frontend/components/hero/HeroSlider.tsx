@@ -14,6 +14,7 @@ interface HeroSliderProps {
   slides: HeroSlide[];
   heightClass?: string; // override default responsive heights
   autoAdvanceMs?: number;
+  onCtaClick?: (slide: HeroSlide) => void;
 }
 
 export const HeroSlider: React.FC<HeroSliderProps> = ({
@@ -21,6 +22,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
   // Fill most of the viewport on desktop while keeping mobile compact
   heightClass = 'h-[360px] md:h-[70vh] lg:h-screen',
   autoAdvanceMs = 3500,
+  onCtaClick,
 }) => {
   const [index, setIndex] = React.useState(0);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,13 +103,24 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
         {current.subtitle && (
           <p className="text-base md:text-lg text-gray-200 max-w-2xl mb-6">{current.subtitle}</p>
         )}
-        {current.ctaText && current.ctaHref && (
-          <a
-            href={current.ctaHref}
-            className="inline-flex w-max items-center justify-center rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          >
-            {current.ctaText}
-          </a>
+        {current.ctaText && (
+          onCtaClick ? (
+            <button
+              onClick={() => onCtaClick(current)}
+              className="inline-flex w-max items-center justify-center rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              {current.ctaText}
+            </button>
+          ) : (
+            current.ctaHref && (
+              <a
+                href={current.ctaHref}
+                className="inline-flex w-max items-center justify-center rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                {current.ctaText}
+              </a>
+            )
+          )
         )}
       </div>
     </div>

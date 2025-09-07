@@ -2,9 +2,11 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import FadeUp from '@/components/ux/FadeUp';
 import { useToast } from '@/components/ui/use-toast';
+import { useDonate } from '@/components/donate/DonateModalContext';
 
 export default function GivePage() {
   const { success, error } = useToast();
+  const donate = useDonate();
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
@@ -165,25 +167,13 @@ export default function GivePage() {
           <div className="mt-6 rounded-xl border bg-white p-4">
             <h3 className="font-semibold mb-2">Give Online</h3>
             <div className="flex flex-wrap gap-3">
-              <button onClick={payWithStripe} className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500">Give Now</button>
-              {pesapalEnabled && (
-                <button onClick={payWithPesapal} className="rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Give Online</button>
-              )}
-              {mpesaEnabled && (
-                <button onClick={payWithMpesa} className="rounded-md bg-green-600 px-4 py-2 text-white text-sm font-medium hover:bg-green-500">Give via Mobile</button>
-              )}
-              {!!process.env.NEXT_PUBLIC_STRIPE_LINK && (
-                <a href={process.env.NEXT_PUBLIC_STRIPE_LINK} target="_blank" rel="noopener" className="rounded-md bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-500">Give Online</a>
-              )}
-              {!!process.env.NEXT_PUBLIC_PESAPAL_LINK && (
-                <a href={process.env.NEXT_PUBLIC_PESAPAL_LINK} target="_blank" rel="noopener" className="rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Give Online</a>
-              )}
-              {!!process.env.NEXT_PUBLIC_MPESA_LINK && (
-                <a href={process.env.NEXT_PUBLIC_MPESA_LINK} target="_blank" rel="noopener" className="rounded-md bg-green-600 px-4 py-2 text-white text-sm font-medium hover:bg-green-500">Give via Mobile</a>
-              )}
-              {!process.env.NEXT_PUBLIC_STRIPE_LINK && !process.env.NEXT_PUBLIC_PESAPAL_LINK && !process.env.NEXT_PUBLIC_MPESA_LINK && (
-                <p className="text-sm text-gray-600">Set NEXT_PUBLIC_STRIPE_LINK / NEXT_PUBLIC_PESAPAL_LINK / NEXT_PUBLIC_MPESA_LINK in .env to enable payment buttons.</p>
-              )}
+              <button
+                onClick={() => donate.open({ type: form.type as any, amount: form.amount, currency: form.currency, frequency: 'ONE_TIME' })}
+                className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
+              >
+                Give Now
+              </button>
+              {/* Single unified flow via modal */}
             </div>
           </div>
         </div>

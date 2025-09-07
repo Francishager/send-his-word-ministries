@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import React from 'react';
+import { useDonate } from '@/components/donate/DonateModalContext';
 
 export default function SiteHeader() {
   const [open, setOpen] = React.useState(false);
+  const donate = useDonate();
   // Live countdown state
   const [now, setNow] = React.useState<Date>(() => new Date());
 
@@ -72,16 +74,30 @@ export default function SiteHeader() {
         </div>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {nav.map((item) => (
-            <Link key={item.name} href={item.href} className="relative text-gray-700 hover:text-indigo-600">
-              {item.name}
-              {item.name === 'Live' && (
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${isLiveNow ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                  {isLiveNow ? 'LIVE' : countdown}
-                </span>
-              )}
-            </Link>
-          ))}
+          {nav.map((item) => {
+            const isDonate = item.name === 'Give' || item.name === 'Donate';
+            if (isDonate) {
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => donate.open({})}
+                  className="relative text-gray-700 hover:text-indigo-600"
+                >
+                  {item.name}
+                </button>
+              );
+            }
+            return (
+              <Link key={item.name} href={item.href} className="relative text-gray-700 hover:text-indigo-600">
+                {item.name}
+                {item.name === 'Live' && (
+                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${isLiveNow ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {isLiveNow ? 'LIVE' : countdown}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="md:hidden">
@@ -105,21 +121,35 @@ export default function SiteHeader() {
       {open && (
         <div className="md:hidden border-t bg-white">
           <div className="px-4 py-3 space-y-2">
-            {nav.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center justify-between text-gray-700 hover:text-indigo-600"
-                onClick={() => setOpen(false)}
-              >
-                <span>{item.name}</span>
-                {item.name === 'Live' && (
-                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${isLiveNow ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {isLiveNow ? 'LIVE' : countdown}
-                  </span>
-                )}
-              </Link>
-            ))}
+            {nav.map((item) => {
+              const isDonate = item.name === 'Give' || item.name === 'Donate';
+              if (isDonate) {
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => { donate.open({}); setOpen(false); }}
+                    className="flex w-full items-center justify-between text-left text-gray-700 hover:text-indigo-600"
+                  >
+                    <span>{item.name}</span>
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="flex items-center justify-between text-gray-700 hover:text-indigo-600"
+                  onClick={() => setOpen(false)}
+                >
+                  <span>{item.name}</span>
+                  {item.name === 'Live' && (
+                    <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${isLiveNow ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {isLiveNow ? 'LIVE' : countdown}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

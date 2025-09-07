@@ -2,9 +2,11 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import FadeUp from '@/components/ux/FadeUp';
 import { useToast } from '@/components/ui/use-toast';
+import { useDonate } from '@/components/donate/DonateModalContext';
 
 export default function DonatePage() {
   const { success, error } = useToast();
+  const donate = useDonate();
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
@@ -155,7 +157,12 @@ export default function DonatePage() {
               <h3 className="font-semibold">One-Time Gifts</h3>
               <p className="text-sm text-gray-700 mt-1">Give a one-time gift toward our ongoing ministry needs.</p>
               <div className="mt-3">
-                <button onClick={payWithStripe} className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500">Donate Now</button>
+                <button
+                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'ONE_TIME' })}
+                  className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
+                >
+                  Donate Now
+                </button>
                 {pesapalEnabled && (
                   <button onClick={payWithPesapal} className="ml-2 rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Give Online</button>
                 )}
@@ -168,7 +175,12 @@ export default function DonatePage() {
               <h3 className="font-semibold">Monthly Partners</h3>
               <p className="text-sm text-gray-700 mt-1">Become a monthly partner to sustain long-term projects and outreach.</p>
               <div className="mt-3">
-                <button onClick={payWithStripe} className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500">Donate Now</button>
+                <button
+                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'MONTHLY' })}
+                  className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
+                >
+                  Donate Now
+                </button>
                 {pesapalEnabled && (
                   <button onClick={payWithPesapal} className="ml-2 rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Pesapal</button>
                 )}
