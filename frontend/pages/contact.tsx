@@ -38,10 +38,10 @@ export default function ContactPage() {
   const onSubmit: SubmitHandler<ContactForm> = async (data) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/core/contact/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ name: data.name, email: data.email, message: data.message }),
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j?.ok) {

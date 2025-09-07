@@ -8,6 +8,7 @@ from .views import (
     RefreshReportingMaterializedViews,
     GivingByTypeReport, DonationsByTypeReport,
     PaymentsPrepareView,
+    ContactSubmitView, NewsletterSubscribeView,
 )
 
 router = DefaultRouter()
@@ -23,6 +24,10 @@ urlpatterns = [
     path('payments/webhooks/pesapal', PesapalWebhookView.as_view(), name='pesapal-webhook'),
     path('payments/webhooks/mobile-money', MobileMoneyWebhookView.as_view(), name='mobile-money-webhook'),
     path('payments/prepare', PaymentsPrepareView.as_view(), name='payments-prepare'),
+
+    # Public forms
+    path('contact/submit', ContactSubmitView.as_view(), name='contact-submit'),
+    path('newsletter/subscribe', NewsletterSubscribeView.as_view(), name='newsletter-subscribe'),
 
     # Reports
     path('reports/giving/weekly', GivingSummaryWeeklyView.as_view(), name='giving-weekly'),
