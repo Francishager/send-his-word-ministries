@@ -7,6 +7,7 @@ import useNextService from '@/hooks/useNextService';
 import { Clock, PlayCircle, Users, HeartHandshake, Book, Church, ArrowRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import stories from '@/data/stories.json';
+import { useDonate } from '@/components/donate/DonateModalContext';
 
 const slides: HeroSlide[] = [
   {
@@ -120,6 +121,7 @@ function toYouTubeEmbed(url?: string): string | null {
 export default function HomePage() {
   const { service, startDate, isLive } = useNextService();
   const { moment } = useServiceMoment();
+  const donate = useDonate();
   const [momentPlaying, setMomentPlaying] = React.useState(false);
   const [highlights, setHighlights] = React.useState<any[]>([]);
   React.useEffect(() => {
@@ -130,7 +132,21 @@ export default function HomePage() {
   }, []);
   return (
     <MainLayout>
-      <HeroSlider slides={slides} autoAdvanceMs={2000} />
+      <HeroSlider
+        slides={slides}
+        autoAdvanceMs={2000}
+        onCtaClick={(slide) => {
+          const href = slide.ctaHref || '';
+          const text = (slide.ctaText || '').toLowerCase();
+          const isGive = href.includes('/give') || href.includes('/donate') || text.includes('give') || text.includes('donate');
+          if (isGive) {
+            const isDonateText = href.includes('/donate') || text.includes('donate');
+            donate.open({ mode: isDonateText ? 'donate' : 'give' });
+          } else if (href) {
+            window.location.href = href;
+          }
+        }}
+      />
 
       <section className="py-12 bg-white">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-6">

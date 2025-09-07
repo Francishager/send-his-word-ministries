@@ -306,6 +306,7 @@ create table if not exists donations (
   user_id uuid not null references users(id) on delete cascade,
   campaign_id uuid references donation_campaigns(id) on delete set null,
   amount numeric(12,2) not null,
+  donation_type text not null check (donation_type in ('partner','project','mission')) default 'partner',
   status text not null default 'pending',
   donated_at timestamptz,
   created_at timestamptz not null default now(),
@@ -369,7 +370,7 @@ create table if not exists giving (
   user_id uuid references users(id) on delete set null,
   service_id uuid references services(id) on delete set null,
   amount numeric(12,2) not null,
-  giving_type text not null check (giving_type in ('tithe','offering','seed','other')) default 'offering',
+  giving_type text not null check (giving_type in ('tithe','offering')) default 'offering',
   method text,                           -- e.g., 'card','mobile_money','cash','bank_transfer'
   reference text,                        -- external transaction reference if applicable
   status text not null default 'pending',-- e.g., 'pending','succeeded','failed','refunded'
@@ -380,6 +381,7 @@ create table if not exists giving (
 );
 create index if not exists idx_giving_user on giving(user_id);
 create index if not exists idx_giving_service on giving(service_id);
+create index if not exists idx_giving_type on giving(giving_type);
 create index if not exists idx_giving_status on giving(status);
 create trigger trg_giving_updated_at
 before update on giving

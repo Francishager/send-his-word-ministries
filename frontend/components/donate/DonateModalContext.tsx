@@ -1,3 +1,15 @@
+  // Simple analytics tracker
+  const track = (event: string, props?: Record<string, any>) => {
+    try {
+      // Google Analytics if available
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', event, props || {});
+      }
+      // Fallback: console
+      // eslint-disable-next-line no-console
+      console.debug('[donate-analytics]', event, props || {});
+    } catch {}
+  };
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +21,7 @@ export type DonateOpenOptions = {
   currency?: string; // e.g., 'usd'
   type?: string; // e.g., 'TITHE' | 'OFFERING' | 'MISSIONS'
   frequency?: 'ONE_TIME' | 'MONTHLY';
+  mode?: 'give' | 'donate';
 };
 
 export type DonateContextValue = {
@@ -36,12 +49,13 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
     email: '',
     amount: '',
     message: '',
-    type: 'TITHE',
+    type: '',
     frequency: 'ONE_TIME' as 'ONE_TIME' | 'MONTHLY',
     currency: 'usd',
   });
   const on = (k: string, v: any) => setForm((p) => ({ ...p, [k]: v }));
   const [method, setMethod] = React.useState<'card' | 'mobile'>('card');
+  const [mode, setMode] = React.useState<'give' | 'donate'>('give');
 
   const FX: Record<string, number> = { usd: 1, eur: 0.92, gbp: 0.78, ugx: 3800, kes: 128, tzs: 2600 };
   const SYMBOL: Record<string, string> = { usd: '$', eur: '€', gbp: '£', ugx: 'USh ', kes: 'KSh ', tzs: 'TSh ' };
@@ -127,13 +141,36 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
         ...p,
         amount: opts?.amount != null ? String(opts.amount) : p.amount,
         currency: opts?.currency || p.currency,
-        type: opts?.type || p.type,
+        // Reset type each time unless explicitly provided
+        type: (opts?.type as any) ?? '',
         frequency: (opts?.frequency as any) || p.frequency,
       }));
+      const m = opts?.mode || 'give';
+      setMode(m);
       const cur = (opts?.currency || form.currency || 'usd').toLowerCase();
       const mobileCurrencies = new Set(['kes', 'ugx', 'tzs']);
       setMethod(mobileCurrencies.has(cur) ? 'mobile' : 'card');
       setOpen(true);
+      track('donate_modal_open', { mode: m, currency: cur });
+      // Geolocate for EA defaults (client-only)
+      if (typeof window !== 'undefined') {
+        fetch('https://ipapi.co/json/')
+          .then((r) => r.json())
+          .then((j) => {
+            const c = (j?.country || '').toUpperCase();
+            const ccMap: Record<string, string> = { KE: 'kes', UG: 'ugx', TZ: 'tzs', RW: 'rwf', BI: 'bif' };
+            if (['KE', 'UG', 'TZ', 'RW', 'BI'].includes(c)) {
+              setMethod('mobile');
+              // Only set currency if not explicitly provided
+              if (!opts?.currency) {
+                const nextCurrency = ccMap[c] || 'kes';
+                setForm((p) => ({ ...p, currency: nextCurrency }));
+              }
+              track('donate_geo_prefill', { country: c });
+            }
+          })
+          .catch(() => {});
+      }
     },
     close: () => setOpen(false),
   };
@@ -155,11 +192,11 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                   <Label className="block mb-2">Select a payment method</Label>
                   <div className="flex gap-4 text-sm">
                     <label className="inline-flex items-center gap-2">
-                      <input type="radio" name="paymethod" value="card" checked={method === 'card'} onChange={() => setMethod('card')} />
-                      Card (Stripe)
+                      <input type="radio" name="paymethod" value="card" checked={method === 'card'} onChange={() => { setMethod('card'); track('donate_method_select', { method: 'card' }); }} />
+                      Card
                     </label>
                     <label className="inline-flex items-center gap-2">
-                      <input type="radio" name="paymethod" value="mobile" checked={method === 'mobile'} onChange={() => setMethod('mobile')} />
+                      <input type="radio" name="paymethod" value="mobile" checked={method === 'mobile'} onChange={() => { setMethod('mobile'); track('donate_method_select', { method: 'mobile' }); }} />
                       Mobile Money
                     </label>
                   </div>
@@ -193,12 +230,21 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="block mb-1">Type</Label>
-                    <select value={form.type} onChange={(e) => on('type', e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 bg-white text-sm">
-                      <option value="TITHE">Tithe</option>
-                      <option value="OFFERING">Offering</option>
-                      <option value="MISSIONS">Missions</option>
-                    </select>
+                    <Label className="block mb-1">Type <span className="text-red-600">*</span></Label>
+                    {mode === 'give' ? (
+                      <select value={form.type} onChange={(e) => on('type', e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 bg-white text-sm">
+                        <option value="">Select type…</option>
+                        <option value="OFFERING">Offering</option>
+                        <option value="TITHE">Tithe</option>
+                      </select>
+                    ) : (
+                      <select value={form.type} onChange={(e) => on('type', e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 bg-white text-sm">
+                        <option value="">Select type…</option>
+                        <option value="PARTNER">Partner</option>
+                        <option value="PROJECT">Project</option>
+                        <option value="MISSION">Mission</option>
+                      </select>
+                    )}
                   </div>
                   <div>
                     <Label className="block mb-1">Frequency</Label>
@@ -215,6 +261,11 @@ export function DonateProvider({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button
                     onClick={async () => {
+                      track('donate_attempt', { method, amount: form.amount, currency: form.currency, type: form.type, frequency: form.frequency, mode });
+                      if (!form.type) {
+                        error('Please select a type.');
+                        return;
+                      }
                       if (method === 'card') {
                         await startStripe();
                         return;

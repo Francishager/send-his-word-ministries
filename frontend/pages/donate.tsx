@@ -158,17 +158,11 @@ export default function DonatePage() {
               <p className="text-sm text-gray-700 mt-1">Give a one-time gift toward our ongoing ministry needs.</p>
               <div className="mt-3">
                 <button
-                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'ONE_TIME' })}
+                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'ONE_TIME', mode: 'donate' })}
                   className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
                 >
                   Donate Now
                 </button>
-                {pesapalEnabled && (
-                  <button onClick={payWithPesapal} className="ml-2 rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Give Online</button>
-                )}
-                {mpesaEnabled && (
-                  <button onClick={payWithMpesa} className="ml-2 rounded-md bg-green-600 px-4 py-2 text-white text-sm font-medium hover:bg-green-500">Give via Mobile</button>
-                )}
               </div>
             </div>
             <div className="rounded-xl border bg-white p-4">
@@ -176,17 +170,11 @@ export default function DonatePage() {
               <p className="text-sm text-gray-700 mt-1">Become a monthly partner to sustain long-term projects and outreach.</p>
               <div className="mt-3">
                 <button
-                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'MONTHLY' })}
+                  onClick={() => donate.open({ amount: form.amount, currency: form.currency, frequency: 'MONTHLY', mode: 'donate' })}
                   className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
                 >
                   Donate Now
                 </button>
-                {pesapalEnabled && (
-                  <button onClick={payWithPesapal} className="ml-2 rounded-md bg-emerald-600 px-4 py-2 text-white text-sm font-medium hover:bg-emerald-500">Pesapal</button>
-                )}
-                {mpesaEnabled && (
-                  <button onClick={payWithMpesa} className="ml-2 rounded-md bg-green-600 px-4 py-2 text-white text-sm font-medium hover:bg-green-500">M-Pesa</button>
-                )}
               </div>
             </div>
           </div>

@@ -168,7 +168,7 @@ export default function GivePage() {
             <h3 className="font-semibold mb-2">Give Online</h3>
             <div className="flex flex-wrap gap-3">
               <button
-                onClick={() => donate.open({ type: form.type as any, amount: form.amount, currency: form.currency, frequency: 'ONE_TIME' })}
+                onClick={() => donate.open({ type: form.type as any, amount: form.amount, currency: form.currency, frequency: 'ONE_TIME', mode: 'give' })}
                 className="rounded-md bg-purple-600 px-4 py-2 text-white text-sm font-medium hover:bg-purple-500"
               >
                 Give Now

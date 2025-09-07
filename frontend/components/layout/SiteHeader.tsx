@@ -80,7 +80,7 @@ export default function SiteHeader() {
               return (
                 <button
                   key={item.name}
-                  onClick={() => donate.open({})}
+                  onClick={() => donate.open({ mode: item.name === 'Give' ? 'give' : 'donate' })}
                   className="relative text-gray-700 hover:text-indigo-600"
                 >
                   {item.name}
@@ -127,7 +127,7 @@ export default function SiteHeader() {
                 return (
                   <button
                     key={item.name}
-                    onClick={() => { donate.open({}); setOpen(false); }}
+                    onClick={() => { donate.open({ mode: item.name === 'Give' ? 'give' : 'donate' }); setOpen(false); }}
                     className="flex w-full items-center justify-between text-left text-gray-700 hover:text-indigo-600"
                   >
                     <span>{item.name}</span>
