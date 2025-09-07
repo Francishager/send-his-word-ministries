@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 export interface HeroSlide {
   src: string;
@@ -63,23 +64,30 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({
     <div className={`relative w-full ${heightClass} overflow-hidden bg-gray-900`}>
       {/* Stacked images for seamless crossfade + slide */}
       {/* Current image */}
-      <img
-        src={current.src}
-        alt={current.alt || current.title || 'Hero'}
-        className={`absolute inset-0 w-full h-full object-cover object-center md:object-[50%_30%] opacity-80 transition-all duration-[1000ms] ease-in-out
+      <div className="absolute inset-0">
+        <Image
+          src={current.src}
+          alt={current.alt || current.title || 'Hero'}
+          fill
+          priority
+          sizes="100vw"
+          className={`object-cover object-center md:object-[50%_30%] opacity-80 transition-all duration-[1000ms] ease-in-out
           ${animating ? '-translate-x-2 opacity-0 scale-[1.02]' : 'translate-x-0 opacity-80 scale-[1.04]'}
         `}
-        loading="eager"
-      />
+        />
+      </div>
       {/* Next image */}
-      <img
-        src={next.src}
-        alt={next.alt || next.title || 'Hero next'}
-        className={`absolute inset-0 w-full h-full object-cover object-center md:object-[50%_30%] opacity-0 transition-all duration-[1000ms] ease-in-out
+      <div className="absolute inset-0" aria-hidden>
+        <Image
+          src={next.src}
+          alt={next.alt || next.title || 'Hero next'}
+          fill
+          sizes="100vw"
+          className={`object-cover object-center md:object-[50%_30%] opacity-0 transition-all duration-[1000ms] ease-in-out
           ${animating ? 'translate-x-0 opacity-80 scale-[1.04]' : 'translate-x-2 opacity-0 scale-[1.02]'}
         `}
-        aria-hidden
-      />
+        />
+      </div>
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
 
