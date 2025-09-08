@@ -1,6 +1,11 @@
-# railway.toml (repo root)
+# railway.toml (place this at the REPO ROOT, alongside the frontend and backend folders)
 [build]
 builder = "NIXPACKS"
 
-[services.backend]
-root = "backend"
+# Pin the build context to backend/ so Nixpacks sees Python
+[build.nixpacks]
+workingDirectory = "backend"
+
+[deploy]
+startCommand = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:$PORT"
+restartPolicyType = "ON_FAILURE"
