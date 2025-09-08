@@ -8,5 +8,5 @@ workingDirectory = "backend"
 
 [deploy]
 # Start the Django app via Gunicorn
-startCommand = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:$PORT"
+startCommand = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:8000"
 restartPolicyType = "ON_FAILURE"
