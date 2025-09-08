@@ -1,0 +1,28 @@
+# Exclude heavy and generated directories to speed up Railway uploads and avoid timeouts
+# Node / Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+
+# Python virtualenvs & caches
+.venv/
+backend/.venv/
+backend.venv/
+**/__pycache__/
+.pytest_cache/
+
+# Build artifacts
+backend/staticfiles/
+dist/
+build/
+
+# Local databases & artifacts
+backend/db.sqlite3
+prisma/dev.db
+prisma/dev.db-journal
+
+# Misc
+.DS_Store
+.git/
+*.log
