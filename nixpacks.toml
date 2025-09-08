@@ -1,0 +1,17 @@
+[phases.setup]
+# Ensure Python is present
+nixPkgs = ["python311"]
+
+[phases.install]
+cmds = [
+  "pip install --upgrade pip",
+  "pip install -r requirements.txt"
+]
+
+[phases.build]
+# Optional: if you collect static files
+# cmds = ["python manage.py collectstatic --noinput || true"]
+cmds = []
+
+[phases.start]
+cmd = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:$PORT"
