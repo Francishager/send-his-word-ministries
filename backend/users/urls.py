@@ -27,10 +27,14 @@ urlpatterns = [
     
     # Admin endpoints
     path('users/', views.UserListView.as_view(), name='user-list'),
+    path('users/export.csv', views.UserExportCSVView.as_view(), name='user-export-csv'),
     path('users/<int:id>/', views.UserDetailView.as_view(), name='user-detail'),
     path('users/assign-role/', views.AssignRoleView.as_view(), name='assign-role'),
+    path('users/<int:user_id>/roles/', views.UserRolesView.as_view(), name='user-roles'),
     
     # Role management (admin only)
     path('roles/', views.RoleListView.as_view(), name='role-list'),
     path('roles/<int:pk>/', views.RoleDetailView.as_view(), name='role-detail'),
+    path('roles/<int:pk>/clone/', views.RoleCloneView.as_view(), name='role-clone'),
+    path('roles/<int:role_id>/permissions/', views.RolePermissionsView.as_view(), name='role-permissions'),
 ]

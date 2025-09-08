@@ -1,3 +1,21 @@
+# Django REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # Public form actions
+        'payments_prepare': '30/min',
+        'contact_submit': '20/min',
+        'newsletter_subscribe': '30/min',
+        # Webhooks (higher ceilings)
+        'stripe_webhook': '120/min',
+        'pesapal_webhook': '120/min',
+        'mobile_money_webhook': '120/min',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
 import os
 from pathlib import Path
 from datetime import timedelta

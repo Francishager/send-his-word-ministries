@@ -25,6 +25,10 @@ from .serializers import (
     GivingSerializer, PaymentSerializer
 )
 from users.permissions import IsAdminUser, IsMinisterUser, IsAdminOrMinisterUser, HasPermission
+from django.conf import settings
+from django.utils import timezone
+from django.http import HttpResponse
+import csv
 
 
 class RoleBasedAccessMixin:
@@ -568,6 +572,8 @@ class PaymentsPrepareView(APIView):
 
 class ContactSubmitView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'contact_submit'
 
     def post(self, request):
         data = request.data or {}
@@ -598,8 +604,145 @@ class ContactSubmitView(APIView):
         return Response({"ok": True})
 
 
+class AdminContactsView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        limit = request.GET.get('limit')
+        dt_from = request.GET.get('from')
+        dt_to = request.GET.get('to')
+        try:
+            limit_n = max(1, min(int(limit or 100), 1000))
+        except Exception:
+            limit_n = 100
+        params = ['contact_submit']
+        where = ["event_type = %s"]
+        if dt_from:
+            where.append("created_at >= %s")
+            params.append(dt_from)
+        if dt_to:
+            where.append("created_at <= %s")
+            params.append(dt_to)
+        params.append(limit_n)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                select id, created_at, event_data
+                from engagement_logs
+                where {' and '.join(where)}
+                order by created_at desc
+                limit %s
+                """,
+                params
+            )
+            cols = [c[0] for c in cursor.description]
+            rows = [dict(zip(cols, r)) for r in cursor.fetchall()]
+        # Normalize
+        out = []
+        for row in rows:
+            data = row.get('event_data') or {}
+            out.append({
+                'id': str(row.get('id')),
+                'created_at': row.get('created_at'),
+                'name': data.get('name'),
+                'email': data.get('email'),
+                'message': data.get('message'),
+                'ip': data.get('ip'),
+                'reviewed': data.get('reviewed') or False,
+                'reviewed_at': data.get('reviewed_at'),
+                'reviewer_id': data.get('reviewer_id'),
+            })
+        return Response(out)
+
+
+class AdminContactsExportView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        dt_from = request.GET.get('from')
+        dt_to = request.GET.get('to')
+        params = ['contact_submit']
+        where = ["event_type = %s"]
+        if dt_from:
+            where.append("created_at >= %s")
+            params.append(dt_from)
+        if dt_to:
+            where.append("created_at <= %s")
+            params.append(dt_to)
+        sql = f"""
+            select id, created_at, event_data
+            from engagement_logs
+            where {' and '.join(where)}
+            order by created_at desc
+        """
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="contacts_export.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['id','created_at','name','email','ip','message','reviewed','reviewed_at','reviewer_id'])
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            for row in cursor.fetchall():
+                _id, created_at, data = row
+                data = data or {}
+                writer.writerow([
+                    str(_id), created_at.isoformat() if created_at else '',
+                    data.get('name') or '', data.get('email') or '',
+                    data.get('ip') or '', (data.get('message') or '').replace('\n',' ').replace('\r',' '),
+                    'true' if data.get('reviewed') else 'false',
+                    data.get('reviewed_at') or '', data.get('reviewer_id') or ''
+                ])
+        return response
+
+
+class PreparedExportCSVView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        kind = (request.GET.get('kind') or 'giving').lower()
+        status_val = (request.GET.get('status') or 'pending').lower()
+        response = HttpResponse(content_type='text/csv')
+        if kind == 'donations':
+            response['Content-Disposition'] = 'attachment; filename="prepared_donations.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['id','user_id','donation_type','status','campaign_id','amount','created_at'])
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    select id, user_id, donation_type, status, campaign_id, amount, created_at
+                    from donations
+                    where status = %s
+                    order by created_at desc
+                    """,
+                    [status_val]
+                )
+                for row in cursor.fetchall():
+                    _id, user_id, donation_type, status_, campaign_id, amount, created_at = row
+                    writer.writerow([str(_id), str(user_id) if user_id else '', donation_type, status_, str(campaign_id) if campaign_id else '', float(amount) if amount is not None else '', created_at.isoformat() if created_at else ''])
+            return response
+        else:
+            response['Content-Disposition'] = 'attachment; filename="prepared_giving.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['id','user_id','giving_type','method','status','amount','created_at'])
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    select id, user_id, giving_type, method, status, amount, created_at
+                    from giving
+                    where status = %s
+                    order by created_at desc
+                    """,
+                    [status_val]
+                )
+                for row in cursor.fetchall():
+                    _id, user_id, giving_type, method, status_, amount, created_at = row
+                    writer.writerow([str(_id), str(user_id) if user_id else '', giving_type, method or '', status_, float(amount) if amount is not None else '', created_at.isoformat() if created_at else ''])
+            return response
+
+
 class NewsletterSubscribeView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'newsletter_subscribe'
 
     def post(self, request):
         data = request.data or {}
@@ -652,6 +795,17 @@ class RefreshReportingMaterializedViews(APIView):
         with connection.cursor() as cursor:
             cursor.execute("SELECT refresh_reporting_materialized_views();")
         return Response({"refreshed": True})
+
+
+class SystemSettingsView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        rf = getattr(settings, 'REST_FRAMEWORK', {}) or {}
+        rates = rf.get('DEFAULT_THROTTLE_RATES', {}) or {}
+        return Response({
+            'throttle_rates': rates,
+        })
 
 
 class GivingByTypeReport(APIView):

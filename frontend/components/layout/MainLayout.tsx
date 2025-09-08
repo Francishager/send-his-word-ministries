@@ -198,7 +198,7 @@ export default function MainLayout({
                   const form = e.currentTarget as HTMLFormElement;
                   const email = (form.elements.namedItem('email') as HTMLInputElement).value;
                   try {
-                    const res = await fetch('/api/newsletter', {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || ''}/core/newsletter/subscribe`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email }),

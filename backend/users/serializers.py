@@ -10,7 +10,7 @@ User = get_user_model()
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description', 'permissions']
         read_only_fields = ['id']
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -31,13 +31,14 @@ class UserSerializer(serializers.ModelSerializer):
         slug_field='name',
         source='roles'
     )
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'phone', 'bio',
             'profile_picture', 'is_active', 'is_verified', 'date_joined',
-            'last_login', 'roles', 'role_names', 'profile'
+            'last_login', 'roles', 'role_names', 'permissions', 'profile'
         ]
         read_only_fields = ['id', 'is_active', 'is_verified', 'date_joined', 'last_login']
         extra_kwargs = {
@@ -51,6 +52,22 @@ class UserSerializer(serializers.ModelSerializer):
         if not representation.get('profile_picture'):
             representation.pop('profile_picture', None)
         return representation
+
+    def get_permissions(self, obj):
+        agg = {}
+        try:
+            for r in obj.roles.all():
+                perms = getattr(r, 'permissions', None) or {}
+                if isinstance(perms, dict):
+                    for k, v in perms.items():
+                        # boolean OR merge for now
+                        try:
+                            agg[k] = bool(v) or bool(agg.get(k))
+                        except Exception:
+                            agg[k] = v
+        except Exception:
+            pass
+        return agg
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile', {})

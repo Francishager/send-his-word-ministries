@@ -8,7 +8,8 @@ from .views import (
     RefreshReportingMaterializedViews,
     GivingByTypeReport, DonationsByTypeReport,
     PaymentsPrepareView,
-    ContactSubmitView, NewsletterSubscribeView,
+    ContactSubmitView, NewsletterSubscribeView, AdminContactsView,
+    SystemSettingsView, AdminContactsExportView, PreparedExportCSVView,
 )
 
 router = DefaultRouter()
@@ -28,6 +29,12 @@ urlpatterns = [
     # Public forms
     path('contact/submit', ContactSubmitView.as_view(), name='contact-submit'),
     path('newsletter/subscribe', NewsletterSubscribeView.as_view(), name='newsletter-subscribe'),
+
+    # Admin
+    path('admin/contacts', AdminContactsView.as_view(), name='admin-contacts'),
+    path('admin/contacts/export.csv', AdminContactsExportView.as_view(), name='admin-contacts-export'),
+    path('admin/system', SystemSettingsView.as_view(), name='admin-system-settings'),
+    path('admin/prepared/export.csv', PreparedExportCSVView.as_view(), name='prepared-export'),
 
     # Reports
     path('reports/giving/weekly', GivingSummaryWeeklyView.as_view(), name='giving-weekly'),

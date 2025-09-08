@@ -4,10 +4,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.cache import cache
+from django.http import HttpResponse
+import csv
 from core.services.validators import is_valid_email
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from django.db import models as dj_models
 
 from .models import User, Role
 from .serializers import (
@@ -171,7 +174,14 @@ class UserListView(generics.ListAPIView):
         role = self.request.query_params.get('role')
         if role:
             queryset = queryset.filter(roles__name=role)
-        return queryset.order_by('-date_joined')
+        q = (self.request.query_params.get('q') or '').strip()
+        if q:
+            queryset = queryset.filter(
+                (dj_models.Q(email__icontains=q)) |
+                (dj_models.Q(first_name__icontains=q)) |
+                (dj_models.Q(last_name__icontains=q))
+            )
+        return queryset.order_by('-date_joined').distinct()
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -270,6 +280,26 @@ class RoleDetailView(generics.RetrieveUpdateDestroyAPIView):
         if instance.name in dict(Role.RoleType.choices):
             raise serializers.ValidationError("System roles cannot be deleted.")
         instance.delete()
+
+
+class RoleCloneView(APIView):
+    """Clone an existing role into a new role name (admin only)."""
+    permission_classes = [IsAdminUser]
+
+    def post(self, request, pk):
+        src = get_object_or_404(Role, pk=pk)
+        new_name = (request.data.get('name') or '').strip()
+        description = request.data.get('description')
+        if not new_name:
+            return Response({"error": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if Role.objects.filter(name=new_name).exists():
+            return Response({"error": "role name already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        clone = Role.objects.create(
+            name=new_name,
+            description=description or src.description,
+            permissions=src.permissions or {},
+        )
+        return Response(RoleSerializer(clone).data, status=status.HTTP_201_CREATED)
 
 class RolePermissionsView(APIView):
     """
@@ -377,3 +407,34 @@ class UserRolesView(APIView):
             'user_id': user.id,
             'roles': [r.name for r in user.roles.all()]
         })
+
+
+class UserExportCSVView(APIView):
+    """Export users as CSV (admin only). Supports optional filters: role, q"""
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        role = request.GET.get('role')
+        q = (request.GET.get('q') or '').strip()
+        qs = User.objects.all()
+        if role:
+            qs = qs.filter(roles__name=role)
+        if q:
+            from django.db import models as dj_models
+            qs = qs.filter(
+                dj_models.Q(email__icontains=q) |
+                dj_models.Q(first_name__icontains=q) |
+                dj_models.Q(last_name__icontains=q)
+            )
+        qs = qs.order_by('-date_joined').distinct()
+
+        # Prepare CSV response
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="users_export.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['id', 'name', 'email', 'roles', 'active', 'joined'])
+        for u in qs.iterator():
+            roles = '|'.join(list(u.roles.values_list('name', flat=True)))
+            name = f"{u.first_name or ''} {u.last_name or ''}".strip()
+            writer.writerow([str(u.id), name, u.email, roles, 'true' if u.is_active else 'false', u.date_joined.isoformat()])
+        return response
