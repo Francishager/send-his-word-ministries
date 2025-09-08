@@ -1,0 +1,6 @@
+# railway.toml (repo root)
+[build]
+builder = "NIXPACKS"
+
+[services.backend]
+root = "backend"

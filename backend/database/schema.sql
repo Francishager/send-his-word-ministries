@@ -757,3 +757,76 @@ create policy "auth delete public-media"
 on storage.objects for delete
 to authenticated
 using (bucket_id = 'public-media');
+
+-- -----------------------------------------------------------------------------
+-- Compatibility fixes to align with Django users/roles models
+-- These ALTERs are safe to run multiple times and address:
+-- 1) Missing auth/user fields (is_superuser, is_staff, etc.) on users
+-- 2) Missing metadata fields on roles (description, permissions)
+-- 3) Type mismatch in user_roles.user_id (uuid vs numeric) causing 'uuid = numeric'
+-- -----------------------------------------------------------------------------
+
+-- Ensure users table has required auth flags and timestamps
+alter table if exists users
+  add column if not exists is_superuser boolean not null default false,
+  add column if not exists is_staff boolean not null default false,
+  add column if not exists is_active boolean not null default true,
+  add column if not exists is_verified boolean not null default false,
+  add column if not exists last_login timestamptz null,
+  add column if not exists date_joined timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now(),
+  add column if not exists first_name varchar(150) not null default '',
+  add column if not exists middle_name varchar(150) not null default '',
+  add column if not exists last_name varchar(150) not null default '',
+  add column if not exists phone varchar(20) null,
+  add column if not exists bio text null,
+  add column if not exists profile_picture varchar(200) null;
+
+-- Ensure unique index on users.email (as per model unique=True)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'users_email_key' and conrelid = 'users'::regclass
+  ) then
+    alter table users add constraint users_email_key unique (email);
+  end if;
+end $$;
+
+-- Ensure roles table has metadata columns used by the app
+alter table if exists roles
+  add column if not exists description text,
+  add column if not exists permissions jsonb not null default '{}'::jsonb,
+  add column if not exists created_at timestamptz not null default now(),
+  add column if not exists updated_at timestamptz not null default now();
+
+-- Enforce unique role names
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'roles_name_key' and conrelid = 'roles'::regclass
+  ) then
+    alter table roles add constraint roles_name_key unique (name);
+  end if;
+end $$;
+
+-- Fix type mismatch in user_roles.user_id to match users(id) numeric PK
+-- If the table is empty, the simplest approach is to drop and recreate the column.
+-- If you already have data, migrate values first as needed.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'user_roles' and column_name = 'user_id' and data_type <> 'bigint'
+  ) then
+    -- Drop FK if it exists (name may differ in some setups)
+    if exists (select 1 from pg_constraint where conname = 'user_roles_user_id_fkey') then
+      alter table user_roles drop constraint user_roles_user_id_fkey;
+    end if;
+    -- Drop and recreate column as bigint referencing users(id)
+    alter table user_roles drop column user_id;
+    alter table user_roles add column user_id bigint not null references users(id) on delete cascade;
+    create index if not exists idx_user_roles_user on user_roles(user_id);
+  end if;
+end $$;

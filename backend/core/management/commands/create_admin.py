@@ -67,11 +67,28 @@ class Command(BaseCommand):
             user = User.objects.create_user(email=email, password=password, is_active=not make_inactive)
             self.stdout.write(self.style.SUCCESS(f"User created: {email}"))
 
-        # Assign role
-        if not user.roles.filter(id=role.id).exists():
-            user.roles.add(role)
-            self.stdout.write(self.style.SUCCESS(f"Assigned role {role.name} to {email}"))
-        else:
-            self.stdout.write(self.style.WARNING(f"User {email} already has role {role.name}"))
+        # Assign role (idempotent) without triggering a join-based exists() check.
+        # Using the through model avoids generating a queryset that may compare mismatched key types
+        # in environments where legacy schemas differ. We rely on the unique(user_id, role_id) constraint
+        # to enforce idempotency.
+        # Perform assignment via raw SQL to avoid PK type mismatches between ORM and DB
+        # We resolve role_id from roles.name at the DB level, and upsert the pair.
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            # Insert if not exists using unique(user_id, role_id)
+            cursor.execute(
+                """
+                insert into user_roles (user_id, role_id, assigned_at, created_at, updated_at)
+                values (
+                    %s,
+                    (select id from roles where name = %s limit 1),
+                    now(), now(), now()
+                )
+                on conflict (user_id, role_id) do nothing
+                """,
+                [user.pk, role.name],
+            )
+        self.stdout.write(self.style.SUCCESS(f"Assigned role {role.name} to {email}"))
 
         self.stdout.write(self.style.SUCCESS("Admin setup complete."))
