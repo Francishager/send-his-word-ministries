@@ -1,5 +1,4 @@
 [phases.setup]
-# Ensure Python is present
 nixPkgs = ["python311"]
 
 [phases.install]
@@ -9,7 +8,6 @@ cmds = [
 ]
 
 [phases.build]
-# Optional: if you collect static files
 # cmds = ["python manage.py collectstatic --noinput || true"]
 cmds = []
 
