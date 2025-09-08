@@ -81,11 +81,11 @@ async function responseInterceptor<T>(response: Response, options: RequestOption
   return data as T;
 }
 
-// Error handler
+// Error handler (less noisy by default; show toast only when explicitly requested)
 function handleApiError(error: any, options: RequestOptions) {
   const errorMessage = options.errorMessage || error.message || 'An unexpected error occurred';
 
-  if (options.handleError !== false) {
+  if (options.handleError) {
     toast.error(errorMessage);
   }
 
@@ -95,14 +95,7 @@ function handleApiError(error: any, options: RequestOptions) {
     data: error.data,
   });
 
-  // Handle specific status codes
-  if (error.status === 401) {
-    // Handle unauthorized
-    if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login?session=expired';
-    }
-  }
-
+  // Let callers decide how to handle 401/redirects to avoid surprising global navigations
   throw error;
 }
 
@@ -140,7 +133,7 @@ export async function apiRequest<T = any>(
 ): Promise<T> {
   const {
     auth = true,
-    handleError: shouldHandleError = true,
+    handleError: shouldHandleError = false,
     retry = 2,
     retryDelay = 1000,
     params,
@@ -166,7 +159,13 @@ export async function apiRequest<T = any>(
       });
 
       const response = await fetch(url.toString(), requestOptions);
-      return await responseInterceptor<T>(response, options);
+      try {
+        return await responseInterceptor<T>(response, options);
+      } catch (err: any) {
+        // Enrich error with endpoint/URL for better diagnostics in logs/UI
+        err.message = options.errorMessage || `${err.message || 'Request failed'} (${response.status}) at ${url.toString()}`;
+        throw err;
+      }
     } catch (error: any) {
       if (shouldHandleError) {
         handleApiError(error, options);

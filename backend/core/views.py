@@ -84,6 +84,28 @@ class ServiceViewSet(RoleBasedAccessMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     perm_code = 'services_manage'
 
+    def get_permissions(self):
+        # Make list/retrieve public so the Live page can load next service without auth
+        if getattr(self, 'action', None) in ["list", "retrieve"]:
+            return [AllowAny()]
+        # keep write actions protected (auth required; RoleBasedAccessMixin enforces roles)
+        return super().get_permissions()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # Optional filter by status (comma-separated)
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            statuses = [s.strip() for s in status_param.split(',') if s.strip()]
+            if statuses:
+                qs = qs.filter(status__in=statuses)
+        # Optional simple ordering by a field name, default is by created_at desc from base
+        ordering = (self.request.query_params.get('ordering') or '').strip()
+        if ordering:
+            # Support leading '-' for desc
+            qs = qs.order_by(ordering)
+        return qs
+
 
 class DonationCampaignViewSet(RoleBasedAccessMixin, viewsets.ModelViewSet):
     queryset = DonationCampaign.objects.all().order_by('-created_at')

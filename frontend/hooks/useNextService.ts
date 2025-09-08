@@ -17,6 +17,43 @@ function parseDate(s?: string): Date | undefined {
   return isNaN(d.getTime()) ? undefined : d;
 }
 
+/**
+ * Compute the next occurrence of a weekly schedule. Defaults to Sunday 10:00 local time.
+ * You can override via env:
+ * - NEXT_PUBLIC_DEFAULT_SERVICE_DAY: 0-6 (0=Sunday)
+ * - NEXT_PUBLIC_DEFAULT_SERVICE_TIME: HH:MM (24h) e.g. "10:00"
+ */
+function computeDefaultNextService(): ServiceDTO {
+  const dayEnv = process.env.NEXT_PUBLIC_DEFAULT_SERVICE_DAY;
+  const timeEnv = process.env.NEXT_PUBLIC_DEFAULT_SERVICE_TIME || '10:00';
+  const targetDow = Number.isInteger(Number(dayEnv)) ? Math.max(0, Math.min(6, Number(dayEnv))) : 0; // Sunday
+  const [hhStr, mmStr] = timeEnv.split(':');
+  const targetHour = Math.max(0, Math.min(23, parseInt(hhStr || '10', 10)));
+  const targetMin = Math.max(0, Math.min(59, parseInt(mmStr || '0', 10)));
+
+  const now = new Date();
+  const d = new Date(now);
+  const currentDow = d.getDay();
+  let addDays = (targetDow - currentDow + 7) % 7;
+  // if today and time already passed, push to next week
+  const candidate = new Date(d);
+  candidate.setDate(d.getDate() + addDays);
+  candidate.setHours(targetHour, targetMin, 0, 0);
+  if (candidate.getTime() <= now.getTime()) {
+    candidate.setDate(candidate.getDate() + 7);
+  }
+
+  return {
+    id: 'fallback-next-service',
+    title: 'Upcoming Service',
+    description: 'Auto-scheduled upcoming service',
+    status: 'wait',
+    start_time: candidate.toISOString(),
+    end_time: undefined,
+    created_at: new Date().toISOString(),
+  };
+}
+
 export function useNextService() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +89,16 @@ export function useNextService() {
           );
           candidate = future[0] || null;
         }
-        if (isMounted) setService(candidate);
+        if (isMounted) {
+          // If no candidate from API, synthesize one so countdown works instead of breaking
+          setService(candidate ?? computeDefaultNextService());
+        }
       } catch (e: any) {
-        if (isMounted) setError(e?.message || 'Failed to load next service');
+        // Record error but still provide a default so the live page shows a countdown
+        if (isMounted) {
+          setError(e?.message || 'Failed to load next service');
+          setService(computeDefaultNextService());
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
