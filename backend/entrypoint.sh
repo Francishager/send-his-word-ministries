@@ -3,7 +3,8 @@
 # Run Django migrations
 python manage.py migrate --noinput
 
-# Collect static files
+# Create staticfiles directory and collect static files
+mkdir -p /app/staticfiles
 python manage.py collectstatic --noinput
 
 # Start Gunicorn on fixed port 8000
