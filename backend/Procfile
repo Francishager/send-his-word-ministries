@@ -1,0 +1,1 @@
+web: gunicorn send-his-word-ministries.wsgi
