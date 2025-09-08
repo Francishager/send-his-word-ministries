@@ -1,13 +1,17 @@
-[build]
-builder = "NIXPACKS"
-buildCommand = "pip install -r requirements.txt"
-serviceRoot = "backend"
+[phases.setup]
+nixPkgs = ["python311"]
 
-[phases]
-  [phases.start]
-  cmd = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:$PORT"
+[phases.install]
+cmds = [
+  "pip install --upgrade pip",
+  "pip install -r requirements.txt"
+]
 
-@@
+[phases.build]
+cmds = []
+
+[phases.start]
+cmd = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:$PORT"
 [phases.setup]
 nixPkgs = ["python311"]
 
