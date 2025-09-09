@@ -1,12 +1,7 @@
 # Railway config at repository root
 [build]
-builder = "NIXPACKS"
-
-[build.nixpacks]
-# Build the Django backend inside the monorepo
-workingDirectory = "backend"
+builder = "DOCKER"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-# Start the Django app via Gunicorn
-startCommand = "gunicorn sendhisword.wsgi:application --bind 0.0.0.0:8000"
 restartPolicyType = "ON_FAILURE"
